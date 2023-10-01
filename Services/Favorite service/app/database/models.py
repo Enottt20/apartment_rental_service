@@ -2,7 +2,6 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, JSON
 from sqlalchemy.orm import relationship
 from .database import Base
 
-
 class Apartment(Base):
     __tablename__ = 'apartments'
 
@@ -10,8 +9,6 @@ class Apartment(Base):
     address = Column(String, index=True)
     rooms = Column(Integer)
     area = Column(Integer)
-
-    favorite_item = relationship("FavoriteItem", back_populates="apartment")
 
 
 class FavoriteItem(Base):
