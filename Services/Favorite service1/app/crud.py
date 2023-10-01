@@ -1,4 +1,4 @@
-from .schemas import FavoriteItem, Test
+from .schemas import FavoriteItem
 from sqlalchemy.orm import Session
 from .database import models
 

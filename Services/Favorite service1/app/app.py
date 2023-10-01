@@ -18,15 +18,9 @@ logging.basicConfig(
 # load config
 cfg: config.Config = config.load_config()
 
-logger.info(
-    'Service configuration loaded:\n' +
-    f'{cfg.json()}'
-)
-
 # init database
 logger.info('Initializing database...')
-SessionLocal = DB_INITIALIZER.init_database(cfg.POSTGRES_DSN)
-
+SessionLocal = DB_INITIALIZER.init_database(cfg.postgres_dsn)
 
 app = FastAPI(
     title='Favorite service'
@@ -80,7 +74,6 @@ async def add_favorite_item(
     if item is not None:
         return item
     return JSONResponse(status_code=404, content={"message": f"Элемент с id {favorite_item.id} уже существует в списке."})
-
 
 @app.put(
     "/favorites/{favoriteId}",

@@ -8,7 +8,6 @@ class DatabaseInitializer():
 
     def init_database(self, postgres_dsn):
         engine = create_engine(postgres_dsn)
-
         SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
