@@ -7,7 +7,7 @@ class Apartment(BaseModel):
     area: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class FavoriteItem(BaseModel):
     id: int
@@ -16,4 +16,4 @@ class FavoriteItem(BaseModel):
     apartment_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
