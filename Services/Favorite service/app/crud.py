@@ -39,7 +39,7 @@ def update_favorite_item(db: Session, item_id: int, updated_item: FavoriteItem):
     db.commit()
 
     if result == 1:
-        return get_favorite_item(db, item_id)
+        return updated_item
     return None
 
 
