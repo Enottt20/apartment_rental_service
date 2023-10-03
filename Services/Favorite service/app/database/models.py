@@ -10,6 +10,8 @@ class Apartment(Base):
     rooms = Column(Integer)
     area = Column(Integer)
 
+    favorite_item = relationship("FavoriteItem", back_populates="apartment")
+
 
 class FavoriteItem(Base):
     __tablename__ = 'favorite_items'

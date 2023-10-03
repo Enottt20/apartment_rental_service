@@ -12,7 +12,7 @@ def get_favorite_items(db: Session, limit: int = 1, offset: int = 0):
 
 def get_favorite_item(db: Session, item_id: int):
     return db.query(models.FavoriteItem) \
-        .filter(models.FavoriteItem.id is item_id) \
+        .filter(models.FavoriteItem.id == item_id) \
         .first()
 
 
@@ -34,7 +34,7 @@ def add_favorite_item(db: Session, item: FavoriteItem):
 
 def update_favorite_item(db: Session, item_id: int, updated_item: FavoriteItem):
     result = db.query(models.FavoriteItem) \
-        .filter(models.FavoriteItem.id is item_id) \
+        .filter(models.FavoriteItem.id == item_id) \
         .update(updated_item.dict())
     db.commit()
 
@@ -45,7 +45,7 @@ def update_favorite_item(db: Session, item_id: int, updated_item: FavoriteItem):
 
 def delete_favorite_item(db: Session, item_id: int):
     result = db.query(models.FavoriteItem) \
-        .filter(models.FavoriteItem.id is item_id) \
+        .filter(models.FavoriteItem.id == item_id) \
         .delete()
     db.commit()
     return result == 1
