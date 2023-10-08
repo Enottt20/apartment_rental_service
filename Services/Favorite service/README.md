@@ -10,3 +10,13 @@
 
 - uvicorn app:app --port 8001 --reload - запуск сервиса с помощью Uvicorn на порту 8001 с автоматической перезагрузкой при изменении кода.
 - ./run.sh - запуск сервиса с помощью скрипта run.sh.
+
+### Сборкра docker образа
+```bash
+docker build -t "favorite-service:1.0" .
+```
+
+Для запуска нужно перейти в Deploy:
+```bash
+docker-compose up -d
+```
