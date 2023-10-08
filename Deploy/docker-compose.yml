@@ -13,8 +13,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Монтирование тома для сохранения данных
 
-  product-service:
-    image: product-service:1.0
+  favorite-service:
+    image: favorite-service:1.0
     ports:
       - "5001:5001"
     environment:
