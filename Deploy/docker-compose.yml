@@ -4,9 +4,9 @@ services:
     image: postgres:16.0  # Используйте версию PostgreSQL 16.0
     container_name: postgresql
     environment:
-      POSTGRES_DB: "postgres"  # Имя вашей базы данных
-      POSTGRES_USER: "postgres"    # Имя пользователя базы данных
-      POSTGRES_PASSWORD: "1111"  # Пароль пользователя базы данных
+      POSTGRES_DB: ${POSTGRES_DB}  # Имя вашей базы данных
+      POSTGRES_USER: ${POSTGRES_USER}    # Имя пользователя базы данных
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # Пароль пользователя базы данных
       PGDATA: /var/lib/postgresql/data/db-files/
     ports:
       - 5432:5432  # Маппинг портов (локальный порт: порт в контейнере)
@@ -18,7 +18,7 @@ services:
     ports:
       - "5001:5001"
     environment:
-      PG_DSN: "postgresql://postgres:1111@postgresql:5432/postgres"
+      PG_DSN: ${POSTGRES_DSN}
 
 volumes:
   postgres_data:
