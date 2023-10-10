@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Query
 from fastapi.responses import JSONResponse
 from starlette.responses import JSONResponse
 from .schemas import Apartment
@@ -65,6 +65,40 @@ async def get_apartments(
     ) -> typing.List[Apartment]:
     return crud.get_apartments(db, limit=limit, offset=offset)
 
+
+@app.get(
+    "/apartments/find/",
+    summary='Возвращает список apartments в определенном радиусе',
+    response_model=list[Apartment]
+)
+async def find_nearby_apartments(
+        latitude: float = Query(description="широта"),
+        longitude: float = Query(description="долгота"),
+        radius: float = Query(description="радиус в метрах"),
+        db: Session = Depends(get_db)
+    ) -> typing.List[Apartment]:
+
+    return crud.find_nearby_apartments(db, latitude=latitude, longitude=longitude, radius=radius)
+
+# Функция для поиска апартаментов в городе с геокодированием
+@app.get(
+    "/apartments/find_in_city/",
+    summary='Возвращает список apartments в определенном городе',
+    response_model=list[Apartment]
+)
+async def find_apartments_in_city(
+    city_name: str,
+    radius: float = 10.0,
+    db: Session = Depends(get_db)
+) -> typing.List[Apartment]:
+
+    city_coords = crud.geocode_city(city_name)
+
+    if city_coords is None:
+        return JSONResponse(status_code=404, content={"message": "Город не найден"})
+
+    apartments = crud.find_nearby_apartments(db, city_coords["lat"], city_coords["lng"], radius * 1000)
+    return apartments
 
 @app.post(
     "/apartments",
