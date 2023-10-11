@@ -1,8 +1,8 @@
 version: '1.0'
 services:
-  postgresql:
+  favoriteDB:
     image: postgres:16.0  # Используйте версию PostgreSQL 16.0
-    container_name: postgresql
+    container_name: favoriteDB
     environment:
       POSTGRES_DB: ${POSTGRES_DB}  # Имя вашей базы данных
       POSTGRES_USER: ${POSTGRES_USER}    # Имя пользователя базы данных
@@ -10,6 +10,7 @@ services:
       PGDATA: /var/lib/postgresql/data/db-files/
     ports:
       - 5432:5432  # Маппинг портов (локальный порт: порт в контейнере)
+    restart: on-failure
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Монтирование тома для сохранения данных
 
@@ -19,6 +20,29 @@ services:
       - "5001:5001"
     environment:
       PG_DSN: ${POSTGRES_DSN}
+
+    
+  apartmentDB:
+    image: postgis:16.0
+    container_name: apartmentDB
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}  # Имя вашей базы данных
+      POSTGRES_USER: ${POSTGRES_USER}    # Имя пользователя базы данных
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}  # Пароль пользователя базы данных
+      PGDATA: /var/lib/postgresql/data/db-files/
+    ports:
+      - 5432:5432  # Маппинг портов (локальный порт: порт в контейнере)
+    restart: on-failure
+    volumes:
+      - postgis-data:/var/lib/postgresql/data  # Монтирование тома для сохранения данных
+
+  apartment-service:
+    image: apartment-service:1.0
+    ports:
+      - "5002:5002"
+    environment:
+      PG_DSN: ${POSTGRES_DSN}
+
 
 volumes:
   postgres_data:
