@@ -1,9 +1,8 @@
 from fastapi import FastAPI, Depends, Query
-from fastapi.responses import JSONResponse
 from starlette.responses import JSONResponse
 from .schemas import Apartment
 from sqlalchemy.orm import Session
-from . import crud, config
+from . import crud, config, geo_functions
 import typing
 import logging
 from .database import DB_INITIALIZER
@@ -25,7 +24,7 @@ logger.info(
 
 # init database
 logger.info('Initializing database...')
-SessionLocal = DB_INITIALIZER.init_database(cfg.POSTGRES_DSN)
+SessionLocal = DB_INITIALIZER.init_database(str(cfg.POSTGRES_DSN))
 
 
 app = FastAPI(
@@ -78,7 +77,7 @@ async def find_nearby_apartments(
         db: Session = Depends(get_db)
     ) -> typing.List[Apartment]:
 
-    return crud.find_nearby_apartments(db, latitude=latitude, longitude=longitude, radius=radius)
+    return crud.get_nearby_apartments(db, latitude=latitude, longitude=longitude, radius=radius)
 
 # Функция для поиска апартаментов в городе с геокодированием
 @app.get(
@@ -88,16 +87,16 @@ async def find_nearby_apartments(
 )
 async def find_apartments_in_city(
     city_name: str,
-    radius: float = 10.0,
+    radius: float = Query(description="радиус в метрах"),
     db: Session = Depends(get_db)
 ) -> typing.List[Apartment]:
 
-    city_coords = crud.geocode_city(city_name)
+    city_coords = geo_functions.geocode_city(city_name)
 
     if city_coords is None:
         return JSONResponse(status_code=404, content={"message": "Город не найден"})
 
-    apartments = crud.find_nearby_apartments(db, city_coords["lat"], city_coords["lng"], radius * 1000)
+    apartments = crud.get_nearby_apartments(db, city_coords["lat"], city_coords["lng"], radius * 1000)
     return apartments
 
 @app.post(

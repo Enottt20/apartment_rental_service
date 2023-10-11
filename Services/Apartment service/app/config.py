@@ -3,7 +3,7 @@ from pydantic import PostgresDsn, Field, Extra
 
 
 class Config(BaseSettings):
-    POSTGRES_DSN: str = Field(
+    POSTGRES_DSN: PostgresDsn = Field(
         default='postgresql://postgres:1111@localhost:5432/postgres',
         env='POSTGRES_DSN',
         alias='POSTGRES_DSN'
