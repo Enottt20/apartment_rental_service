@@ -96,7 +96,7 @@ async def find_apartments_in_city(
     if city_coords is None:
         return JSONResponse(status_code=404, content={"message": "Город не найден"})
 
-    apartments = crud.get_nearby_apartments(db, city_coords["lat"], city_coords["lng"], radius * 1000)
+    apartments = crud.get_nearby_apartments(db, city_coords["lat"], city_coords["lng"], radius)
     return apartments
 
 @app.post(
