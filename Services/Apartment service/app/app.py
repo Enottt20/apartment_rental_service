@@ -58,46 +58,32 @@ async def get_apartment(
     response_model=list[Apartment]
 )
 async def get_apartments(
-        limit: int = 1,
-        offset: int = 0,
+        limit: int = Query(10, description="Максимальное количество записей"),
+        offset: int = Query(0, description="Смещение записей"),
+        city_name: str = Query(None, description="Название города"),
+        radius: float = Query(None, description="радиус в метрах"),
+        latitude: float = Query(None, description="широта"),
+        longitude: float = Query(None, description="долгота"),
         db: Session = Depends(get_db)
     ) -> typing.List[Apartment]:
-    return crud.get_apartments(db, limit=limit, offset=offset)
+    """
+    Возвращает список ближайших квартир и сортирует по близости.
+    В первую очередь по городу.
+    Во вторую очередь по широте и долготе.
+    Если не указать город и координаты, то вернет просто список квартир.
+    """
+    if city_name:
+        city_coords = geo_functions.geocode_city(city_name)
+        if city_coords is None:
+            return JSONResponse(status_code=404, content={"message": "Город не найден"})
+        latitude = city_coords["lat"]
+        longitude = city_coords["lng"]
 
+    if latitude is not None and longitude is not None and radius is not None:
+        return crud.get_nearby_apartments(db, latitude, longitude, radius, limit, offset)
+    else:
+        return crud.get_apartments(db, limit, offset)
 
-@app.get(
-    "/apartments/find/",
-    summary='Возвращает список apartments в определенном радиусе',
-    response_model=list[Apartment]
-)
-async def find_nearby_apartments(
-        latitude: float = Query(description="широта"),
-        longitude: float = Query(description="долгота"),
-        radius: float = Query(description="радиус в метрах"),
-        db: Session = Depends(get_db)
-    ) -> typing.List[Apartment]:
-
-    return crud.get_nearby_apartments(db, latitude=latitude, longitude=longitude, radius=radius)
-
-# Функция для поиска апартаментов в городе с геокодированием
-@app.get(
-    "/apartments/find_in_city/",
-    summary='Возвращает список apartments в определенном городе',
-    response_model=list[Apartment]
-)
-async def find_apartments_in_city(
-    city_name: str,
-    radius: float = Query(description="радиус в метрах"),
-    db: Session = Depends(get_db)
-) -> typing.List[Apartment]:
-
-    city_coords = geo_functions.geocode_city(city_name)
-
-    if city_coords is None:
-        return JSONResponse(status_code=404, content={"message": "Город не найден"})
-
-    apartments = crud.get_nearby_apartments(db, city_coords["lat"], city_coords["lng"], radius)
-    return apartments
 
 @app.post(
     "/apartments",

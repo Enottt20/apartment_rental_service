@@ -4,9 +4,9 @@ services:
     image: postgis/postgis:latest
     container_name: postgis
     environment:
-      POSTGRES_DB: postgres  # Имя вашей базы данных
-      POSTGRES_USER: postgres    # Имя пользователя базы данных
-      POSTGRES_PASSWORD: 1023 # Пароль пользователя базы данных
+      POSTGRES_DB: ${POSTGRES_DB}  # Имя вашей базы данных
+      POSTGRES_USER: ${POSTGRES_USER}    # Имя пользователя базы данных
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Пароль пользователя базы данных
     ports:
       - 5432:5432  # Маппинг портов (локальный порт: порт в контейнере)
     volumes:
@@ -17,14 +17,14 @@ services:
     ports:
       - "5001:5001"
     environment:
-      PG_DSN: ${POSTGRES_DSN}
+      POSTGRES_DSN: ${POSTGRES_DSN}
 
   apartment-service:
     image: apartment-service:1.0
     ports:
       - "5002:5002"
     environment:
-      PG_DSN: ${POSTGRES_DSN}
+      POSTGRES_DSN: ${POSTGRES_DSN}
 
 
 volumes:

@@ -18,17 +18,19 @@ def get_apartment(db: Session, apartment_id: int):
         .first()
 
 
-def get_nearby_apartments(db: Session, latitude: float, longitude: float, radius: float):
+def get_nearby_apartments(db: Session, latitude: float, longitude: float, radius: float, limit: int = 1,
+                          offset: int = 0):
+
     location = func.ST_GeogFromText(f'POINT({latitude} {longitude})', type_=Geometry)
+
     apartments = db.query(models.Apartment).filter(
         func.ST_DWithin(models.Apartment.location, location, radius)
-    ).all()
+    ).order_by(func.ST_Distance(models.Apartment.location, location)).offset(offset).limit(limit).all()
+
     return apartments
 
 
-
 def add_apartment(db: Session, apartment: Apartment):
-
     db_item = models.Apartment(
         id=apartment.id,
         address=apartment.address,
@@ -38,6 +40,10 @@ def add_apartment(db: Session, apartment: Apartment):
         longitude=apartment.longitude,
         location=f'POINT({apartment.latitude} {apartment.longitude})'
     )
+
+    #Если обьект уже существует то дальше не идем
+    if get_apartment(db=db, apartment_id=apartment.id):
+        return None
 
     db.add(db_item)
     db.commit()
@@ -57,7 +63,7 @@ def update_apartment(db: Session, apartment_id: int, updated_apartment: Apartmen
         db_apartment.area = updated_apartment.area
         db_apartment.latitude = updated_apartment.latitude
         db_apartment.longitude = updated_apartment.longitude
-        db_apartment.location=f'POINT({updated_apartment.latitude} {updated_apartment.longitude})'
+        db_apartment.location = f'POINT({updated_apartment.latitude} {updated_apartment.longitude})'
 
         # Сохраняем обновленную запись
         db.commit()
