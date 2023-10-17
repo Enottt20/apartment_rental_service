@@ -3,6 +3,13 @@ from sqlalchemy.orm import Session
 from .database import models
 from sqlalchemy import func
 from geoalchemy2 import Geometry
+from . import geo_functions
+
+
+def get_apartment(db: Session, apartment_id: int):
+    return db.query(models.Apartment) \
+        .filter(models.Apartment.id == apartment_id) \
+        .first()
 
 
 def get_apartments(db: Session, limit: int = 1, offset: int = 0):
@@ -12,15 +19,42 @@ def get_apartments(db: Session, limit: int = 1, offset: int = 0):
         .all()
 
 
-def get_apartment(db: Session, apartment_id: int):
-    return db.query(models.Apartment) \
-        .filter(models.Apartment.id == apartment_id) \
-        .first()
+def get_apartments2(db: Session, *filters):
+    apartments = db.query(models.Apartment)
+
+    filters = dict(filters)
+
+    limit = filters.get('limit')
+    offset = filters.get('offset')
+    radius = dict(filters).get('radius')
+    city_name = dict(filters).get('city_name')
+    latitude = dict(filters).get('latitude')
+    longitude = dict(filters).get('longitude')
+
+    if limit and offset:
+        apartments = apartments.offset(offset).limit(limit).all()
+
+    if city_name:
+        city_coords = geo_functions.geocode_city(city_name)
+
+        if city_coords is None:
+            return None
+
+        latitude = city_coords["lat"]
+        longitude = city_coords["lng"]
+
+    if latitude is not None and longitude is not None and radius is not None:
+        location = func.ST_GeogFromText(f'POINT({latitude} {longitude})', type_=Geometry)
+
+        apartments = apartments.filter(
+            func.ST_DWithin(models.Apartment.location, location, radius)
+        ).order_by(func.ST_Distance(models.Apartment.location, location)).offset(offset).limit(limit).all()
+
+    return apartments
 
 
 def get_nearby_apartments(db: Session, latitude: float, longitude: float, radius: float, limit: int = 1,
                           offset: int = 0):
-
     location = func.ST_GeogFromText(f'POINT({latitude} {longitude})', type_=Geometry)
 
     apartments = db.query(models.Apartment).filter(
@@ -41,7 +75,7 @@ def add_apartment(db: Session, apartment: Apartment):
         location=f'POINT({apartment.latitude} {apartment.longitude})'
     )
 
-    #Если обьект уже существует то дальше не идем
+    # Если обьект уже существует то дальше не идем
     if get_apartment(db=db, apartment_id=apartment.id):
         return None
 

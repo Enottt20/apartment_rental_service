@@ -72,6 +72,13 @@ async def get_apartments(
     Во вторую очередь по широте и долготе.
     Если не указать город и координаты, то вернет просто список квартир.
     """
+
+    apartments = crud.get_apartments2(db, limit, offset, city_name, radius, latitude, longitude)
+
+    if apartments is None:
+        return JSONResponse(status_code=404, content={"message": "Не валидный запрос"})
+    return apartments
+
     if city_name:
         city_coords = geo_functions.geocode_city(city_name)
         if city_coords is None:
