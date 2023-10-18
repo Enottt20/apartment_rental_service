@@ -1,9 +1,10 @@
-from .schemas import Apartment
+from .schemas import Apartment, ApartmentsQuery
 from sqlalchemy.orm import Session
 from .database import models
 from sqlalchemy import func
 from geoalchemy2 import Geometry
-from . import geo_functions
+from .geo_functions import geocode_city
+from sqlalchemy_filters import apply_filters
 
 
 def get_apartment(db: Session, apartment_id: int):
@@ -12,54 +13,49 @@ def get_apartment(db: Session, apartment_id: int):
         .first()
 
 
-def get_apartments(db: Session, limit: int = 1, offset: int = 0):
-    return db.query(models.Apartment) \
-        .offset(offset) \
-        .limit(limit) \
-        .all()
+def get_apartments(db: Session, apartments_query: ApartmentsQuery):
+    class ApartmentSpecification:
+        def __init__(self):
+            self.filters = []
+            self.sorting = []
 
+        def by_location(self, latitude, longitude, radius):
+            if latitude is not None and longitude is not None and radius is not None:
+                location = func.ST_GeogFromText(f'POINT({latitude} {longitude})', type_=Geometry)
+                self.filters.append(func.ST_DWithin(models.Apartment.location, location, radius))
+                self.sorting.append(func.ST_Distance(models.Apartment.location, location))
+            return self
 
-def get_apartments2(db: Session, *filters):
-    apartments = db.query(models.Apartment)
+        def by_city(self, city_name, radius):
+            if city_name:
+                city_coords = geocode_city(city_name)
+                if city_coords is not None:
+                    latitude = city_coords["lat"]
+                    longitude = city_coords["lng"]
+                    location = func.ST_GeogFromText(f'POINT({latitude} {longitude})', type_=Geometry)
+                    self.filters.append(func.ST_DWithin(models.Apartment.location,location, radius))
+                    self.sorting.append(func.ST_Distance(models.Apartment.location, location))
+            return self
 
-    filters = dict(filters)
+        def build_filters(self):
+            return self.filters
 
-    limit = filters.get('limit')
-    offset = filters.get('offset')
-    radius = dict(filters).get('radius')
-    city_name = dict(filters).get('city_name')
-    latitude = dict(filters).get('latitude')
-    longitude = dict(filters).get('longitude')
+        def build_sorting(self):
+            return self.sorting
 
-    if limit and offset:
-        apartments = apartments.offset(offset).limit(limit).all()
+    query = db.query(models.Apartment)
 
-    if city_name:
-        city_coords = geo_functions.geocode_city(city_name)
+    if apartments_query.city_name is not None and apartments_query.radius is not None:
+        apartment_spec = ApartmentSpecification().by_city(apartments_query.city_name, apartments_query.radius)
+        query = query.filter(*apartment_spec.build_filters()).order_by(*apartment_spec.build_sorting())
 
-        if city_coords is None:
-            return None
+    if apartments_query.city_name is None and apartments_query.latitude is not None and apartments_query.longitude \
+            is not None and apartments_query.radius is not None:
+        apartment_spec = ApartmentSpecification().by_location(apartments_query.latitude, apartments_query.longitude, apartments_query.radius)
+        query = query.filter(*apartment_spec.build_filters()).order_by(*apartment_spec.build_sorting())
 
-        latitude = city_coords["lat"]
-        longitude = city_coords["lng"]
-
-    if latitude is not None and longitude is not None and radius is not None:
-        location = func.ST_GeogFromText(f'POINT({latitude} {longitude})', type_=Geometry)
-
-        apartments = apartments.filter(
-            func.ST_DWithin(models.Apartment.location, location, radius)
-        ).order_by(func.ST_Distance(models.Apartment.location, location)).offset(offset).limit(limit).all()
-
-    return apartments
-
-
-def get_nearby_apartments(db: Session, latitude: float, longitude: float, radius: float, limit: int = 1,
-                          offset: int = 0):
-    location = func.ST_GeogFromText(f'POINT({latitude} {longitude})', type_=Geometry)
-
-    apartments = db.query(models.Apartment).filter(
-        func.ST_DWithin(models.Apartment.location, location, radius)
-    ).order_by(func.ST_Distance(models.Apartment.location, location)).offset(offset).limit(limit).all()
+    query = query.offset(apartments_query.offset).limit(apartments_query.limit)
+    apartments = query.all()
 
     return apartments
 

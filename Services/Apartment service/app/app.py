@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Depends, Query
 from starlette.responses import JSONResponse
-from .schemas import Apartment
+from .schemas import Apartment, ApartmentsQuery
 from sqlalchemy.orm import Session
-from . import crud, config, geo_functions
+from . import crud, config
 import typing
 import logging
 from .database import DB_INITIALIZER
@@ -73,23 +73,18 @@ async def get_apartments(
     Если не указать город и координаты, то вернет просто список квартир.
     """
 
-    apartments = crud.get_apartments2(db, limit, offset, city_name, radius, latitude, longitude)
+    apartments_query = ApartmentsQuery(
+        limit=limit,
+        offset=offset,
+        city_name=city_name,
+        radius=radius,
+        latitude=latitude,
+        longitude=longitude
+    )
 
-    if apartments is None:
-        return JSONResponse(status_code=404, content={"message": "Не валидный запрос"})
+    apartments = crud.get_apartments(db, apartments_query)
+
     return apartments
-
-    if city_name:
-        city_coords = geo_functions.geocode_city(city_name)
-        if city_coords is None:
-            return JSONResponse(status_code=404, content={"message": "Город не найден"})
-        latitude = city_coords["lat"]
-        longitude = city_coords["lng"]
-
-    if latitude is not None and longitude is not None and radius is not None:
-        return crud.get_nearby_apartments(db, latitude, longitude, radius, limit, offset)
-    else:
-        return crud.get_apartments(db, limit, offset)
 
 
 @app.post(
