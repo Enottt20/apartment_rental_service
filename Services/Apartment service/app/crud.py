@@ -14,45 +14,25 @@ def get_apartment(db: Session, apartment_id: int):
 
 
 def get_apartments(db: Session, apartments_query: ApartmentsQuery):
-    class ApartmentSpecification:
-        def __init__(self):
-            self.filters = []
-            self.sorting = []
-
-        def by_location(self, latitude, longitude, radius):
-            if latitude is not None and longitude is not None and radius is not None:
-                location = func.ST_GeogFromText(f'POINT({latitude} {longitude})', type_=Geometry)
-                self.filters.append(func.ST_DWithin(models.Apartment.location, location, radius))
-                self.sorting.append(func.ST_Distance(models.Apartment.location, location))
-            return self
-
-        def by_city(self, city_name, radius):
-            if city_name:
-                city_coords = geocode_city(city_name)
-                if city_coords is not None:
-                    latitude = city_coords["lat"]
-                    longitude = city_coords["lng"]
-                    location = func.ST_GeogFromText(f'POINT({latitude} {longitude})', type_=Geometry)
-                    self.filters.append(func.ST_DWithin(models.Apartment.location,location, radius))
-                    self.sorting.append(func.ST_Distance(models.Apartment.location, location))
-            return self
-
-        def build_filters(self):
-            return self.filters
-
-        def build_sorting(self):
-            return self.sorting
 
     query = db.query(models.Apartment)
 
     if apartments_query.city_name is not None and apartments_query.radius is not None:
-        apartment_spec = ApartmentSpecification().by_city(apartments_query.city_name, apartments_query.radius)
-        query = query.filter(*apartment_spec.build_filters()).order_by(*apartment_spec.build_sorting())
+        city_coords = geocode_city(apartments_query.city_name)
+        if city_coords is not None:
+            latitude = city_coords["lat"]
+            longitude = city_coords["lng"]
+            location = func.ST_GeogFromText(f'POINT({latitude} {longitude})', type_=Geometry)
+            query = query.filter(func.ST_DWithin(models.Apartment.location, location, apartments_query.radius))
+            query = query.order_by(func.ST_Distance(models.Apartment.location, location))
+
 
     if apartments_query.city_name is None and apartments_query.latitude is not None and apartments_query.longitude \
             is not None and apartments_query.radius is not None:
-        apartment_spec = ApartmentSpecification().by_location(apartments_query.latitude, apartments_query.longitude, apartments_query.radius)
-        query = query.filter(*apartment_spec.build_filters()).order_by(*apartment_spec.build_sorting())
+        location = func.ST_GeogFromText(f'POINT({apartments_query.latitude} {apartments_query.longitude})', type_=Geometry)
+        query = query.filter(func.ST_DWithin(models.Apartment.location, location, apartments_query.radius))
+        query = query.order_by(func.ST_Distance(models.Apartment.location, location))
+
 
     query = query.offset(apartments_query.offset).limit(apartments_query.limit)
     apartments = query.all()
