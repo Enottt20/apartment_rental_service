@@ -26,6 +26,16 @@ services:
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
 
+  user-service:
+    image: user-service:1.0
+    ports:
+      - "5003:5003"
+    environment:
+      POSTGRES_DSN: ${POSTGRES_DB_ASYNC_DSN}
+      JWT_SECRET: ${JWT_SECRET}
+      RESET_PASSWORD_TOKEN_SECRET: ${RESET_PASSWORD_TOKEN_SECRET}
+      VERIFICATION_TOKEN_SECRET: ${VERIFICATION_TOKEN_SECRET}
+
 
 volumes:
   postgres_data:
