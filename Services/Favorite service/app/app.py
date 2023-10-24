@@ -25,7 +25,7 @@ logger.info(
 
 # init database
 logger.info('Initializing database...')
-SessionLocal = DB_INITIALIZER.init_database(cfg.POSTGRES_DSN)
+SessionLocal = DB_INITIALIZER.init_database(str(cfg.POSTGRES_DSN))
 
 
 app = FastAPI(
@@ -86,7 +86,7 @@ async def add_favorite_item(
     "/favorites/{favoriteId}",
     summary='Обновляет информацию об favorite item'
 )
-async def update_device(
+async def update_favorite_item(
         favoriteId: int,
         updated_item: FavoriteItem,
         db: Session = Depends(get_db)
@@ -100,7 +100,7 @@ async def update_device(
     "/favorites/{favoriteId}",
     summary='Удаляет favorite item из базы'
 )
-async def delete_device(
+async def delete_favorite_item(
         favoriteId: int,
         db: Session = Depends(get_db)
     ) -> FavoriteItem:

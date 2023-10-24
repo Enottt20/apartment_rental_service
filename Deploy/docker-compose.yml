@@ -1,16 +1,41 @@
 version: '1.0'
 services:
-  db:
-    image: postgres:latest
-    container_name: postgres_db
+  postgresql:
+    image: postgis/postgis:latest
+    container_name: postgis
     environment:
-      POSTGRES_DB: postgres  # Имя вашей базы данных
-      POSTGRES_USER: postgres    # Имя пользователя базы данных
-      POSTGRES_PASSWORD: 1111  # Пароль пользователя базы данных
+      POSTGRES_DB: ${POSTGRES_DB}  # Имя вашей базы данных
+      POSTGRES_USER: ${POSTGRES_USER}    # Имя пользователя базы данных
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Пароль пользователя базы данных
     ports:
-      - "5432:5432"  # Маппинг портов (локальный порт: порт в контейнере)
+      - 5432:5432  # Маппинг портов (локальный порт: порт в контейнере)
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # Монтирование тома для сохранения данных
+      - /path/to/local/data:/var/lib/postgresql/data  # Монтирование тома для сохранения данных
+
+  favorite-service:
+    image: favorite-service:1.0
+    ports:
+      - "5001:5001"
+    environment:
+      POSTGRES_DSN: ${POSTGRES_DSN}
+
+  apartment-service:
+    image: apartment-service:1.0
+    ports:
+      - "5002:5002"
+    environment:
+      POSTGRES_DSN: ${POSTGRES_DSN}
+
+  user-service:
+    image: user-service:1.0
+    ports:
+      - "5003:5003"
+    environment:
+      POSTGRES_DSN: ${POSTGRES_DB_ASYNC_DSN}
+      JWT_SECRET: ${JWT_SECRET}
+      RESET_PASSWORD_TOKEN_SECRET: ${RESET_PASSWORD_TOKEN_SECRET}
+      VERIFICATION_TOKEN_SECRET: ${VERIFICATION_TOKEN_SECRET}
+
 
 volumes:
   postgres_data:

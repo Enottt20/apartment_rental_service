@@ -19,6 +19,6 @@ class FavoriteItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     description = Column(String)
-    #apartment_id = Column(Integer, ForeignKey('apartments.id'))
+    apartment_id = Column(Integer)
 
     #apartment = relationship("Apartment", back_populates="favorite_item")
