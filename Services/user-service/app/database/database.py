@@ -10,19 +10,16 @@ class Database_Initializer():
     def __init__(self, base, schema):
         self.base = base
         self.schema = schema
-        self.__async_session_maker = None
-
-    def get_schema(self):
-        return self.schema
+        self.async_session_maker = None
 
     async def init_db(self, postgre_dsn):
         engine = create_async_engine(postgre_dsn)
-        self.__async_session_maker = async_sessionmaker(
+        self.async_session_maker = async_sessionmaker(
             engine, expire_on_commit=False
         )
         async with engine.begin() as connection:
             # create schema
-            schema = self.get_schema()
+            schema = self.schema
 
             def check_schema(conn):
                 return inspect(conn).has_schema(schema)
@@ -33,10 +30,6 @@ class Database_Initializer():
 
             # create metadata
             await connection.run_sync(self.base.metadata.create_all)
-
-    @property
-    def async_session_maker(self):
-        return self.__async_session_maker
 
 
 SCHEMA = "users"

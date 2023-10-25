@@ -10,7 +10,7 @@ services:
     ports:
       - 5432:5432  # Маппинг портов (локальный порт: порт в контейнере)
     volumes:
-      - /path/to/local/data:/var/lib/postgresql/data  # Монтирование тома для сохранения данных
+      - postgres_data:/var/lib/postgresql/data
 
   favorite-service:
     image: favorite-service:1.0

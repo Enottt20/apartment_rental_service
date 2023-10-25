@@ -4,8 +4,6 @@ from .database import models
 from sqlalchemy import func
 from geoalchemy2 import Geometry
 from .geo_functions import geocode_city
-from sqlalchemy_filters import apply_filters
-
 
 def get_apartment(db: Session, apartment_id: int):
     return db.query(models.Apartment) \
