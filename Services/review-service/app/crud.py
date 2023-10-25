@@ -1,51 +1,56 @@
-from .schemas import FavoriteItem
-from sqlalchemy.orm import Session
+from starlette.responses import JSONResponse
+
+from .schemas import ReviewUpdate, ReviewCreate, Review
 from .database import models
+from typing import List
 
 
-def get_favorite_items(db: Session, limit: int = 1, offset: int = 0):
-    return db.query(models.FavoriteItem) \
-        .offset(offset) \
-        .limit(limit) \
-        .all()
+def get_reviews(skip: int = 0, limit: int = 10) -> List[models.Review]:
+    return models.Review.objects \
+        .skip(skip) \
+        .limit(limit)
 
 
-def get_favorite_item(db: Session, item_id: int):
-    return db.query(models.FavoriteItem) \
-        .filter(models.FavoriteItem.id == item_id) \
-        .first()
+def add_review(review: ReviewCreate) -> models.Review:
+    new_review = models.Review(**review.model_dump())
+    new_review.save()
+
+    return new_review
 
 
-def add_favorite_item(db: Session, item: FavoriteItem):
-
-    db_item = models.FavoriteItem(
-        id=item.id,
-        name=item.name,
-        description=item.description,
-        apartment_id=item.apartment_id
+def db_model_to_review(review: models.Review) -> Review:
+    return Review(
+        id=review.id,
+        title=review.title,
+        description=review.description
     )
 
-    db.add(db_item)
-    db.commit()
-    db.refresh(db_item)
 
-    return item
+def get_review_by_uid(uid: str) -> Review:
+    review = models.Review.objects(id=uid).first()
 
-
-def update_favorite_item(db: Session, item_id: int, updated_item: FavoriteItem):
-    result = db.query(models.FavoriteItem) \
-        .filter(models.FavoriteItem.id == item_id) \
-        .update(updated_item.dict())
-    db.commit()
-
-    if result == 1:
-        return updated_item
-    return None
+    if review is not None:
+        return db_model_to_review(review)
 
 
-def delete_favorite_item(db: Session, item_id: int):
-    result = db.query(models.FavoriteItem) \
-        .filter(models.FavoriteItem.id == item_id) \
-        .delete()
-    db.commit()
-    return result == 1
+def update_review_by_uid(uid: str, review_update: ReviewUpdate) -> Review:
+    review = models.Review.objects(id=uid).first()
+
+    if review is None:
+        return None
+
+    review.title = review_update.title
+    review.description = review_update.description
+
+    review.save()
+    return db_model_to_review(review)
+
+
+def remove_review_by_uid(uid: str):
+    review = models.Review.objects(id=uid).first()
+
+    if review is None:
+        return JSONResponse(status_code=404, content={"message": "review not found"})
+
+    review.delete()
+    return JSONResponse(status_code=200, content={"message": "Deleted"})

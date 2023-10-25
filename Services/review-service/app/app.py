@@ -1,110 +1,81 @@
-from fastapi import FastAPI, Depends
-from fastapi.responses import JSONResponse
-from starlette.responses import JSONResponse
-from .schemas import FavoriteItem
-from sqlalchemy.orm import Session
-from . import crud, config
-import typing
+from fastapi import FastAPI, UploadFile
+from fastapi.responses import JSONResponse, StreamingResponse
+
 import logging
-from .database import DB_INITIALIZER
+from typing import List, Annotated
+from uuid import UUID
 
-# setup logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    level=2,
-    format="%(levelname)-9s %(message)s"
-)
+from . import config, crud
+from .database import MongoDB
+from .schemas import ReviewUpdate, ReviewCreate, Review
 
-# load config
+
+################
+## INITIALIZE ##
+################
+logger = logging.getLogger("review-service")
+logging.basicConfig(level=logging.INFO, 
+                    format="[%(levelname)s][%(name)s][%(filename)s, line %(lineno)d]: %(message)s")
+
+logger.info("Service configuration loading...")
 cfg: config.Config = config.load_config()
 
 logger.info(
     'Service configuration loaded:\n' +
-    f'{cfg.json()}'
+    f'{cfg.model_dump_json(by_alias=True, indent=4)}'
 )
 
-# init database
-logger.info('Initializing database...')
-SessionLocal = DB_INITIALIZER.init_database(str(cfg.POSTGRES_DSN))
+logger.info("Service database loading...")
+MongoDB(mongo_dsn=str(cfg.mongo_dsn))
+logger.info("Service database loaded")
+
 
 
 app = FastAPI(
-    title='Favorite service'
+    version='0.0.1',
+    title='review service'
 )
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-@app.get(
-    "/favorites/{favoriteId}", status_code=201, response_model=FavoriteItem,
-    summary='По айди получить favorite item'
+@app.get("/reviews", 
+         summary="Returns all reviews",
+         response_model=List[Review]
 )
-async def get_favorite_item(
-        item_id: int,
-        db: Session = Depends(get_db)
-    ) -> FavoriteItem:
-    item = crud.get_favorite_item(db, item_id)
-    if item is not None:
-        return item
-    return JSONResponse(status_code=404, content={"message": "Item not found"})
+async def get_reviews(skip: int = 0, limit: int = 10):
+    return crud.get_reviews(skip, limit)
 
 
-@app.get(
-    "/favorites",
-    summary='Возвращает список favorite items',
-    response_model=list[FavoriteItem]
+@app.post("/reviews", 
+         summary="Add new review",
+         response_model=Review
 )
-async def get_favorite_items(
-        limit: int = 1,
-        offset: int = 0,
-        db: Session = Depends(get_db)
-    ) -> typing.List[FavoriteItem]:
-    return crud.get_favorite_items(db, limit=limit, offset=offset)
+async def add_review(review: ReviewCreate) -> Review:
+    return crud.add_review(review)
 
 
-@app.post(
-    "/favorites",
-    status_code=201,
-    response_model=FavoriteItem,
-    summary='Добавляет favorite item в базу'
+@app.get("/reviews/{review_id}", 
+         summary="Get review by id",
 )
-async def add_favorite_item(
-        favorite_item: FavoriteItem,
-        db: Session = Depends(get_db)
-    ) -> FavoriteItem:
-    item = crud.add_favorite_item(db, favorite_item)
-    if item is not None:
-        return item
-    return JSONResponse(status_code=404, content={"message": f"Элемент с id {favorite_item.id} уже существует в списке."})
+async def get_review_uid(review_id: str) -> Review:
+    review = crud.get_review_by_uid(review_id)
+    if review is None:
+        return JSONResponse(status_code=404, content={"message": "Not found"})
+    return review
 
 
-@app.put(
-    "/favorites/{favoriteId}",
-    summary='Обновляет информацию об favorite item'
+@app.put("/reviews/{review_id}", 
+         summary="Update review info by id",
 )
-async def update_favorite_item(
-        favoriteId: int,
-        updated_item: FavoriteItem,
-        db: Session = Depends(get_db)
-    ) -> FavoriteItem:
-    item = crud.update_favorite_item(db, favoriteId, updated_item)
-    if item is not None:
-        return item
-    return JSONResponse(status_code=404, content={"message": "Item not found"})
+async def update_review(review_id: str, review_update: ReviewUpdate) -> Review:
+    review = crud.update_review_by_uid(review_id, review_update)
+    if review is None:
+        return JSONResponse(status_code=404, content={"message": "Not found"})
+    return review
 
-@app.delete(
-    "/favorites/{favoriteId}",
-    summary='Удаляет favorite item из базы'
+
+@app.delete("/reviews/{review_id}", 
+         summary="Delete review by id",
 )
-async def delete_favorite_item(
-        favoriteId: int,
-        db: Session = Depends(get_db)
-    ) -> FavoriteItem:
-    if crud.delete_favorite_item(db, favoriteId):
-        return JSONResponse(status_code=200, content={"message": "Item successfully deleted"})
-    return JSONResponse(status_code=404, content={"message": "Item not found"})
+async def delete_review(review_id: str) -> Review:
+    return crud.remove_review_by_uid(review_id)
 

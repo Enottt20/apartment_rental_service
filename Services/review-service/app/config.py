@@ -4,7 +4,7 @@ from pydantic import Field, Extra, MongoDsn
 
 class Config(BaseSettings):
     mongo_dsn: MongoDsn = Field(
-        default='mongodb://mongo:mongo@mongodb:27017/mongo',
+        default='mongodb://localhost:27017/',
         env='MONGO_DSN',
         alias='MONGO_DSN'
     )

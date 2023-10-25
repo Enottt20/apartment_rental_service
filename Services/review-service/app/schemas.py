@@ -1,12 +1,7 @@
-from pydantic import BaseModel, Field, Base64Bytes
+from pydantic import BaseModel, BaseConfig, Field, validator
 from pydantic_core import core_schema
 from pydantic.json_schema import JsonSchemaValue
 from typing import Optional, List, Any, Annotated
-
-from ..database.models import ProductStatusEnum
-
-from uuid import UUID
-
 from bson import ObjectId
 
 
@@ -36,39 +31,31 @@ class ObjectIdPydanticAnnotation:
         return handler(core_schema.str_schema())
 
 
-class ProductBase(BaseModel):
-    product_name: str = Field(title="Product name")
-    description: Optional[str] = Field(title="Product description", default="Description")
+class ObjectIdStr(str):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
 
+    @classmethod
+    def validate(cls, value):
+        if not ObjectId.is_valid(value):
+            raise ValueError('Недопустимый ObjectId')
+        return ObjectId(value)
 
-class ProductCreate(ProductBase):
-    pass
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(format='ObjectId')
 
-
-class ProductUpdate(ProductBase):
-    status: ProductStatusEnum = Field(title="Product status")
-
-
-class Product(ProductBase):
-    id: Annotated[str, ObjectIdPydanticAnnotation]
-    status: ProductStatusEnum = Field(title="Product status")
-    images: List[UUID] = Field(title="Product images", default=[])
-
-
-
-# Pydantic-модель для отзыва
 class ReviewBase(BaseModel):
     title: str
     description: str
 
-# Pydantic-модель для создания отзыва
 class ReviewCreate(ReviewBase):
     pass
 
-# Pydantic-модель для обновления отзыва
 class ReviewUpdate(ReviewBase):
     pass
 
-# Pydantic-модель для ответа с отзывом
-class ReviewResponse(ReviewBase):
-    id: str
+class Review(ReviewBase):
+    id: Annotated[str, ObjectIdPydanticAnnotation]
+
