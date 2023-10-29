@@ -84,10 +84,6 @@ class RequestEnforcer:
 
         resource = '/' + request.path_params['path_name']
 
-        print(token_data)
-        print(resource)
-        print(request.method)
-
         access_allowed = self.enforcer.enforce(token_data, resource, request.method)
         if access_allowed is False:
             return False, None

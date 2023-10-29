@@ -39,7 +39,8 @@ app = FastAPI(
 
 @app.get("/reviews", 
          summary="Returns all reviews",
-         response_model=List[Review]
+         response_model=List[Review],
+         tags=['reviews']
 )
 async def get_reviews(skip: int = 0, limit: int = 10):
     return crud.get_reviews(skip, limit)
@@ -47,7 +48,8 @@ async def get_reviews(skip: int = 0, limit: int = 10):
 
 @app.post("/reviews", 
          summary="Add new review",
-         response_model=Review
+         response_model=Review,
+         tags=['reviews']
 )
 async def add_review(review: ReviewCreate) -> Review:
     return crud.add_review(review)
@@ -55,6 +57,7 @@ async def add_review(review: ReviewCreate) -> Review:
 
 @app.get("/reviews/{review_id}", 
          summary="Get review by id",
+         tags=['reviews']
 )
 async def get_review_uid(review_id: str) -> Review:
     review = crud.get_review_by_uid(review_id)
@@ -65,6 +68,7 @@ async def get_review_uid(review_id: str) -> Review:
 
 @app.put("/reviews/{review_id}", 
          summary="Update review info by id",
+         tags=['reviews']
 )
 async def update_review(review_id: str, review_update: ReviewUpdate) -> Review:
     review = crud.update_review_by_uid(review_id, review_update)
@@ -75,6 +79,7 @@ async def update_review(review_id: str, review_update: ReviewUpdate) -> Review:
 
 @app.delete("/reviews/{review_id}", 
          summary="Delete review by id",
+         tags=['reviews']
 )
 async def delete_review(review_id: str) -> Review:
     return crud.remove_review_by_uid(review_id)

@@ -12,24 +12,42 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  mongo:
+  image: mongo:7.0
+  volumes:
+    - mongo-data:/data/db
+    - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+  ports:
+    - "27017:27017"
+  environment:
+    MONGO_INITDB_DATABASE: mongo
+
+
+  policy-enforcement-service:
+    image: policy-enforcement-service:1.0
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_DSN: ${POSTGRES_DSN}
+
   favorite-service:
     image: favorite-service:1.0
     ports:
-      - "5001:5001"
+      - "8001:8001"
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
 
   apartment-service:
     image: apartment-service:1.0
     ports:
-      - "5002:5002"
+      - "8002:8002"
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
 
   user-service:
     image: user-service:1.0
     ports:
-      - "5003:5003"
+      - "8003:8003"
     environment:
       POSTGRES_DSN: ${POSTGRES_DB_ASYNC_DSN}
       JWT_SECRET: ${JWT_SECRET}
@@ -39,3 +57,4 @@ services:
 
 volumes:
   postgres_data:
+  mongo-data:

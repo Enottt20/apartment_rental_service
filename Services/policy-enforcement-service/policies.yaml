@@ -1,9 +1,15 @@
 services:
     - name: favorite-service
-      entrypoint: http://127.0.0.1:5001/
+      entrypoint: http://127.0.0.1:8001/
+      inject_token_in_swagger: True
+    - name: apartment-service
+      entrypoint: http://127.0.0.1:8002/
       inject_token_in_swagger: True
     - name: user-service
-      entrypoint: http://127.0.0.1:5002/
+      entrypoint: http://127.0.0.1:8003/
+      inject_token_in_swagger: True
+    - name: review-service
+      entrypoint: http://127.0.0.1:8004/
       inject_token_in_swagger: True
 model: |
     [request_definition]
@@ -18,19 +24,67 @@ model: |
     [matchers]
     m = eval(p.sub_rule) && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
 policies:
+      #group_id
+      #1 - Покупатель услуг
+      #2 - Арендадатель
+      #3 - Админ
+
+      #Покупатель услуг
     - service: favorite-service
-      rule: r.sub.group_id > 1
+      rule: r.sub.group_id == 1
       resource: /favorites*
       methods: (GET)|(POST)|(PUT)|(DELETE)
+    - service: apartment-service
+      rule: r.sub.group_id == 1
+      resource: /apartments*
+      methods: GET
     - service: user-service
       rule: r.sub.group_id == 1
-      resource: /groups*
+      resource: /users/*
+      methods: GET
+    - service: review-service
+      rule: r.sub.group_id == 1
+      resource: /reviews*
       methods: (GET)|(POST)|(PUT)|(DELETE)
+
+      #Арендадатель
+    - service: apartment-service
+      rule: r.sub.group_id == 2
+      resource: /apartments*
+      methods: (GET)|(POST)|(PUT)|(DELETE)
+    - service: user-service
+      rule: r.sub.group_id == 2
+      resource: /users/*
+      methods: GET
+    - service: review-service
+      rule: r.sub.group_id == 2
+      resource: /reviews*
+      methods: GET
+
+      #Админ
+    - service: favorite-service
+      rule: r.sub.group_id == 3
+      resource: /favorites*
+      methods: (GET)|(POST)|(PUT)|(DELETE)
+    - service: apartment-service
+      rule: r.sub.group_id == 3
+      resource: /apartments*
+      methods: (GET)|(POST)|(PUT)|(DELETE)
+    - service: user-service
+      rule: r.sub.group_id == 3
+      resource: /users/*
+      methods: (GET)|(POST)|(PUT)|(DELETE)
+    - service: review-service
+      rule: r.sub.group_id == 3
+      resource: /reviews*
+      methods: (GET)|(POST)|(PUT)|(DELETE)
+
+      #общее
     - service: user-service
       resource: /auth/*
       methods: POST
       white_list: true
     - service: user-service
-      resource: /users/*
-      methods: (GET)|(POST)|(PUT)|(DELETE)
       rule: r.sub.group_id > 0
+      resource: /groups*
+      methods: (GET)|(POST)|(PUT)|(DELETE)

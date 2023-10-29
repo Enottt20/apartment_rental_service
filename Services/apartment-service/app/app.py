@@ -40,7 +40,8 @@ def get_db():
 
 @app.get(
     "/apartments/{apartment_id}", status_code=201, response_model=Apartment,
-    summary='По айди получить apartment'
+    summary='По айди получить apartment',
+    tags=['apartments']
 )
 async def get_apartment(
         apartment_id: int,
@@ -55,7 +56,8 @@ async def get_apartment(
 @app.get(
     "/apartments",
     summary='Возвращает список apartments',
-    response_model=list[Apartment]
+    response_model=list[Apartment],
+    tags=['apartments']
 )
 async def get_apartments(
         limit: int = Query(10, description="Максимальное количество записей"),
@@ -91,7 +93,8 @@ async def get_apartments(
     "/apartments",
     status_code=201,
     response_model=Apartment,
-    summary='Добавляет apartment в базу'
+    summary='Добавляет apartment в базу',
+    tags=['apartments']
 )
 async def add_apartment(
         apartment: Apartment,
@@ -105,7 +108,8 @@ async def add_apartment(
 
 @app.put(
     "/apartments/{apartment_id}",
-    summary='Обновляет информацию об apartment'
+    summary='Обновляет информацию об apartment',
+    tags=['apartments']
 )
 async def update_apartment(
         apartment_id: int,
@@ -119,7 +123,8 @@ async def update_apartment(
 
 @app.delete(
     "/apartments/{apartment_id}",
-    summary='Удаляет favorite item из базы'
+    summary='Удаляет favorite item из базы',
+    tags=['apartments']
 )
 async def delete_apartment(
         apartment_id: int,

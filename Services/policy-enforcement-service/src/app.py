@@ -36,12 +36,10 @@ app = App()
 
 @app.api_route("/{path_name:path}", methods=["GET", "DELETE", "PATCH", "POST", "PUT", "HEAD", "OPTIONS", "CONNECT", "TRACE"])
 async def catch_all(request: Request, path_name: str):
-    print(request.url, request.query_params)
     enforce_result: EnforceResult = policy_checker.enforce(request)
     if not enforce_result.access_allowed:
         return JSONResponse(content={'message': 'Content not found'}, status_code=404)
 
-    print(enforce_result.redirect_service, path_name)
 
 
     client = httpx.AsyncClient(base_url=enforce_result.redirect_service)

@@ -41,7 +41,8 @@ def get_db():
 
 @app.get(
     "/favorites/{favoriteId}", status_code=201, response_model=FavoriteItem,
-    summary='По айди получить favorite item'
+    summary='По айди получить favorite item',
+    tags=['favorites']
 )
 async def get_favorite_item(
         item_id: int,
@@ -56,7 +57,8 @@ async def get_favorite_item(
 @app.get(
     "/favorites",
     summary='Возвращает список favorite items',
-    response_model=list[FavoriteItem]
+    response_model=list[FavoriteItem],
+    tags=['favorites']
 )
 async def get_favorite_items(
         limit: int = 1,
@@ -70,7 +72,8 @@ async def get_favorite_items(
     "/favorites",
     status_code=201,
     response_model=FavoriteItem,
-    summary='Добавляет favorite item в базу'
+    summary='Добавляет favorite item в базу',
+    tags=['favorites']
 )
 async def add_favorite_item(
         favorite_item: FavoriteItem,
@@ -84,7 +87,8 @@ async def add_favorite_item(
 
 @app.put(
     "/favorites/{favoriteId}",
-    summary='Обновляет информацию об favorite item'
+    summary='Обновляет информацию об favorite item',
+    tags=['favorites']
 )
 async def update_favorite_item(
         favoriteId: int,
@@ -98,7 +102,8 @@ async def update_favorite_item(
 
 @app.delete(
     "/favorites/{favoriteId}",
-    summary='Удаляет favorite item из базы'
+    summary='Удаляет favorite item из базы',
+    tags=['favorites']
 )
 async def delete_favorite_item(
         favoriteId: int,
