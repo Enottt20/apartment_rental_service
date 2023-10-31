@@ -11,50 +11,90 @@ services:
       - 5432:5432  # Маппинг портов (локальный порт: порт в контейнере)
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    
 
   mongo:
-  image: mongo:7.0
-  volumes:
-    - mongo-data:/data/db
-    - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
-  ports:
-    - "27017:27017"
-  environment:
-    MONGO_INITDB_DATABASE: mongo
+    image: mongo:7.0
+    volumes:
+      - mongo-data:/data/db
+      - ./mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: mongo
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+    
 
 
   policy-enforcement-service:
     image: policy-enforcement-service:1.0
+    build:
+      context: ../services/policy-enforcement-service
+      dockerfile: ./Dockerfile
     ports:
-      - "8000:8000"
+      - "5100:5100"
+    volumes:
+      - policy-enforcement-data:/mnt/
     environment:
-      POSTGRES_DSN: ${POSTGRES_DSN}
+      JWT_SECRET: ${JWT_SECRET}
+      POLICIES_CONFIG_PATH: ${POLICIES_CONFIG_PATH}
+    
 
   favorite-service:
     image: favorite-service:1.0
+    build:
+      context: ../services/favorite-service
+      dockerfile: ./Dockerfile
     ports:
-      - "8001:8001"
+      - "5001:5001"
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
+    
 
   apartment-service:
     image: apartment-service:1.0
+    build:
+      context: ../services/apartment-service
+      dockerfile: ./Dockerfile
     ports:
-      - "8002:8002"
+      - "5002:5002"
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
+    
 
   user-service:
     image: user-service:1.0
+    build:
+      context: ../services/user-service
+      dockerfile: ./Dockerfile
     ports:
-      - "8003:8003"
+      - "5003:5003"
     environment:
       POSTGRES_DSN: ${POSTGRES_DB_ASYNC_DSN}
       JWT_SECRET: ${JWT_SECRET}
       RESET_PASSWORD_TOKEN_SECRET: ${RESET_PASSWORD_TOKEN_SECRET}
       VERIFICATION_TOKEN_SECRET: ${VERIFICATION_TOKEN_SECRET}
+    
+
+  review-service:
+    image: review-service:1.0
+    build:
+      context: ../services/review-service
+      dockerfile: ./Dockerfile
+    ports:
+      - "5004:5004"
+    environment:
+      MONGO_DSN: ${MONGO_DSN}
+    
 
 
 volumes:
   postgres_data:
   mongo-data:
+  policy-enforcement-data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./policy-enforcement-data

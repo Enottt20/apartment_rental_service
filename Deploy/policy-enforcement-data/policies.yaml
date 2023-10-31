@@ -1,15 +1,15 @@
 services:
     - name: favorite-service
-      entrypoint: http://127.0.0.1:8001/
+      entrypoint: http://favorite-service:5001/
       inject_token_in_swagger: True
     - name: apartment-service
-      entrypoint: http://127.0.0.1:5002/
+      entrypoint: http://apartment-service:5002/
       inject_token_in_swagger: True
     - name: user-service
-      entrypoint: http://127.0.0.1:5003/
+      entrypoint: http://user-service:5003/
       inject_token_in_swagger: True
     - name: review-service
-      entrypoint: http://127.0.0.1:5004/
+      entrypoint: http://review-service:5004/
       inject_token_in_swagger: True
 model: |
     [request_definition]
