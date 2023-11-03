@@ -1,15 +1,13 @@
 from typing import Optional
-
+from datetime import datetime
 from pydantic import BaseModel
 
 
-class Apartment(BaseModel):
+class Reservation(BaseModel):
     id: int
-    address: str
-    rooms: int
-    area: int
-    latitude: float
-    longitude: float
+    arrival_date: datetime
+    departure_date: datetime
+    apartment_id: int
 
     class Config:
         from_attributes = True

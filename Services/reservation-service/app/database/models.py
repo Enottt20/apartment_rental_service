@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, JSON, Float, DATETIME
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, JSON, Float, DateTime
 import datetime
 from sqlalchemy.orm import relationship
 from .database import Base
@@ -8,8 +8,8 @@ class Reservation(Base):
     __tablename__ = 'reservation'
 
     id = Column(Integer, primary_key=True, index=True)
-    date_in = Column(DATETIME)
-    date_out = Column(DATETIME)
+    arrival_date = Column(DateTime, default=datetime.datetime.utcnow)
+    departure_date = Column(DateTime, default=datetime.datetime.utcnow)
     apartment_id = Column(Integer)
 
 

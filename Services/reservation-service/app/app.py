@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, Query
 from starlette.responses import JSONResponse
-from .schemas import Apartment, ApartmentsQuery
+from .schemas import Reservation
 from sqlalchemy.orm import Session
 from . import crud, config
 import typing
@@ -28,7 +28,7 @@ SessionLocal = DB_INITIALIZER.init_database(str(cfg.POSTGRES_DSN))
 
 
 app = FastAPI(
-    title='Apartment service'
+    title='reservations service'
 )
 
 def get_db():
@@ -39,98 +39,76 @@ def get_db():
         db.close()
 
 @app.get(
-    "/apartments/{apartment_id}", status_code=201, response_model=Apartment,
-    summary='По айди получить apartment',
-    tags=['apartments']
+    "/reservations/{reservation_id}", status_code=201, response_model=Reservation,
+    summary='По айди получить Reservation',
+    tags=['reservations']
 )
-async def get_apartment(
-        apartment_id: int,
+async def get_reservation(
+        reservation_id: int,
         db: Session = Depends(get_db)
-    ) -> Apartment:
-    item = crud.get_apartment(db, apartment_id)
+    ) -> Reservation:
+    item = crud.get_reservation_item(db, reservation_id)
     if item is not None:
         return item
     return JSONResponse(status_code=404, content={"message": "Item not found"})
 
 
 @app.get(
-    "/apartments",
-    summary='Возвращает список apartments',
-    response_model=list[Apartment],
-    tags=['apartments']
+    "/reservations",
+    summary='Возвращает список reservations',
+    response_model=list[Reservation],
+    tags=['reservations']
 )
-async def get_apartments(
-        limit: int = Query(10, description="Максимальное количество записей"),
-        offset: int = Query(0, description="Смещение записей"),
-        city_name: str = Query(None, description="Название города"),
-        radius: float = Query(None, description="радиус в метрах"),
-        latitude: float = Query(None, description="широта"),
-        longitude: float = Query(None, description="долгота"),
+async def get_reservations(
+        limit: int = 1,
+        offset: int = 0,
         db: Session = Depends(get_db)
-    ) -> typing.List[Apartment]:
-    """
-    Возвращает список ближайших квартир и сортирует по близости.
-    В первую очередь по городу.
-    Во вторую очередь по широте и долготе.
-    Если не указать город и координаты, то вернет просто список квартир.
-    """
-
-    apartments_query = ApartmentsQuery(
-        limit=limit,
-        offset=offset,
-        city_name=city_name,
-        radius=radius,
-        latitude=latitude,
-        longitude=longitude
-    )
-
-    apartments = crud.get_apartments(db, apartments_query)
-
-    return apartments
+) -> typing.List[Reservation]:
+    return crud.get_reservation_items(db, limit=limit, offset=offset)
 
 
 @app.post(
-    "/apartments",
+    "/reservations",
     status_code=201,
-    response_model=Apartment,
-    summary='Добавляет apartment в базу',
-    tags=['apartments']
+    response_model=Reservation,
+    summary='Добавляет Reservation в базу',
+    tags=['reservations']
 )
-async def add_apartment(
-        apartment: Apartment,
+async def add_Reservation(
+        Reservation: Reservation,
         db: Session = Depends(get_db)
-    ) -> Apartment:
-    item = crud.add_apartment(db, apartment)
+    ) -> Reservation:
+    item = crud.add_reservation_item(db, Reservation)
     if item is not None:
         return item
-    return JSONResponse(status_code=404, content={"message": f"Элемент с id {apartment.id} уже существует в списке."})
+    return JSONResponse(status_code=404, content={"message": f"Элемент с id {Reservation.id} уже существует в списке."})
 
 
 @app.put(
-    "/apartments/{apartment_id}",
-    summary='Обновляет информацию об apartment',
-    tags=['apartments']
+    "/reservations/{reservation_id}",
+    summary='Обновляет информацию об Reservation',
+    tags=['reservations']
 )
-async def update_apartment(
-        apartment_id: int,
-        updated_item: Apartment,
+async def update_Reservation(
+        reservation_id: int,
+        updated_item: Reservation,
         db: Session = Depends(get_db)
-    ) -> Apartment:
-    item = crud.update_apartment(db, apartment_id, updated_item)
+    ) -> Reservation:
+    item = crud.update_reservation_item(db, reservation_id, updated_item)
     if item is not None:
         return item
     return JSONResponse(status_code=404, content={"message": "Item not found"})
 
 @app.delete(
-    "/apartments/{apartment_id}",
+    "/reservations/{reservation_id}",
     summary='Удаляет favorite item из базы',
-    tags=['apartments']
+    tags=['reservations']
 )
-async def delete_apartment(
-        apartment_id: int,
+async def delete_Reservation(
+        reservation_id: int,
         db: Session = Depends(get_db)
-    ) -> Apartment:
-    if crud.delete_apartment(db, apartment_id):
+    ) -> Reservation:
+    if crud.delete_reservation_item(db, reservation_id):
         return JSONResponse(status_code=200, content={"message": "Item successfully deleted"})
     return JSONResponse(status_code=404, content={"message": "Item not found"})
 
