@@ -11,6 +11,16 @@ services:
       - 5432:5432  # Маппинг портов (локальный порт: порт в контейнере)
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+
+  rabbitmq:
+    image: "rabbitmq:3-management"  # Используем образ с веб-интерфейсом для удобного мониторинга
+    ports:
+      - "5672:5672"  # Порт для AMQP
+      - "15672:15672"  # Порт для веб-интерфейса
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     
 
   mongo:
@@ -28,7 +38,6 @@ services:
 
 
   policy-enforcement-service:
-    image: policy-enforcement-service:1.0
     build:
       context: ../services/policy-enforcement-service
       dockerfile: ./Dockerfile
@@ -42,7 +51,6 @@ services:
     
 
   favorite-service:
-    image: favorite-service:1.0
     build:
       context: ../services/favorite-service
       dockerfile: ./Dockerfile
@@ -53,7 +61,6 @@ services:
     
 
   apartment-service:
-    image: apartment-service:1.0
     build:
       context: ../services/apartment-service
       dockerfile: ./Dockerfile
@@ -64,7 +71,6 @@ services:
     
 
   user-service:
-    image: user-service:1.0
     build:
       context: ../services/user-service
       dockerfile: ./Dockerfile
@@ -78,7 +84,6 @@ services:
     
 
   review-service:
-    image: review-service:1.0
     build:
       context: ../services/review-service
       dockerfile: ./Dockerfile

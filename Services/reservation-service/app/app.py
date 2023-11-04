@@ -6,6 +6,7 @@ from . import crud, config
 import typing
 import logging
 from .database import DB_INITIALIZER
+from . import broker
 
 # setup logging
 logger = logging.getLogger(__name__)
@@ -25,6 +26,12 @@ logger.info(
 # init database
 logger.info('Initializing database...')
 SessionLocal = DB_INITIALIZER.init_database(str(cfg.POSTGRES_DSN))
+
+message_producer = broker.MessageProducer(
+    dsn=cfg.RABBITMQ_DSN.unicode_string(),
+    exchange_name=cfg.EXCHANGE_NAME,
+    queue_name=cfg.QUEUE_NAME,
+)
 
 
 app = FastAPI(
@@ -78,7 +85,7 @@ async def add_Reservation(
         Reservation: Reservation,
         db: Session = Depends(get_db)
     ) -> Reservation:
-    item = crud.add_reservation_item(db, Reservation)
+    item = crud.add_reservation_item(db, Reservation, message_producer)
     if item is not None:
         return item
     return JSONResponse(status_code=404, content={"message": f"Элемент с id {Reservation.id} уже существует в списке."})

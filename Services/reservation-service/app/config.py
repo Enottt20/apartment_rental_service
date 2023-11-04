@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from pydantic import PostgresDsn, Field, Extra
+from pydantic import PostgresDsn, Field, Extra, AmqpDsn
 
 
 class Config(BaseSettings):
@@ -7,6 +7,24 @@ class Config(BaseSettings):
         default='postgresql://postgres:postgres@localhost:5432/postgres',
         env='POSTGRES_DSN',
         alias='POSTGRES_DSN'
+    )
+
+    RABBITMQ_DSN: AmqpDsn = Field(
+        default='amqp://guest:guest@localhost//',
+        env='RABBITMQ_DSN',
+        alias='RABBITMQ_DSN'
+    )
+
+    QUEUE_NAME: str = Field(
+        default='notification',
+        env='QUEUE_NAME',
+        alias='QUEUE_NAME'
+    )
+
+    EXCHANGE_NAME: str = Field(
+        default='notification',
+        env='EXCHANGE_NAME',
+        alias='EXCHANGE_NAME'
     )
 
     POSTGRES_PASSWORD: str = Field(
