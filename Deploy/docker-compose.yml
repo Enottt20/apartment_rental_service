@@ -91,6 +91,37 @@ services:
       - "5004:5004"
     environment:
       MONGO_DSN: ${MONGO_DSN}
+
+    
+  
+  reservation-service:
+    build:
+      context: ../services/reservation-service
+      dockerfile: ./Dockerfile
+    ports:
+      - "5005:5005"
+    environment:
+      POSTGRES_DSN: ${POSTGRES_DSN}
+      APARTMENT_SERVICE_DSN: ${APARTMENT_SERVICE_DSN}
+      RABBITMQ_DSN: ${RABBITMQ_DSN}
+      QUEUE_NAME: ${QUEUE_NAME_NOTIFICATION}
+      EXCHANGE_NAME: ${EXCHANGE_NAME_NOTIFICATION}
+
+
+
+  notification-service:
+    build:
+      context: ../services/notification-service
+      dockerfile: ./Dockerfile
+    ports:
+      - "5006:5006"
+    environment:
+      QUEUE_NAME: ${QUEUE_NAME_NOTIFICATION}
+      RABBITMQ_DSN: ${RABBITMQ_DSN}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EMAIL_LOGIN: ${EMAIL_LOGIN}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SERVER: ${SMTP_SERVER}
     
 
 

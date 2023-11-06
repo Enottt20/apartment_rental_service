@@ -41,6 +41,7 @@ def get_apartments(db: Session, apartments_query: ApartmentsQuery):
 def add_apartment(db: Session, apartment: Apartment):
     db_item = models.Apartment(
         id=apartment.id,
+        title=apartment.title,
         address=apartment.address,
         rooms=apartment.rooms,
         area=apartment.area,
@@ -66,7 +67,9 @@ def update_apartment(db: Session, apartment_id: int, updated_apartment: Apartmen
 
     if db_apartment:
         # Обновляем поля квартиры на основе данных из updated_apartment
+        db_apartment.id = updated_apartment.id
         db_apartment.address = updated_apartment.address
+        db_apartment.title = updated_apartment.title
         db_apartment.rooms = updated_apartment.rooms
         db_apartment.area = updated_apartment.area
         db_apartment.latitude = updated_apartment.latitude

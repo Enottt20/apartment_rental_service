@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class Apartment(BaseModel):
     id: int
+    title: str
     address: str
     rooms: int
     area: int

@@ -7,6 +7,7 @@ class Apartment(Base):
     __tablename__ = 'apartments'
 
     id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True)
     address = Column(String, index=True)
     rooms = Column(Integer)
     area = Column(Integer)

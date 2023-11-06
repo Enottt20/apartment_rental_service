@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class Reservation(BaseModel):
     id: int
+    email: str
     arrival_date: datetime
     departure_date: datetime
     apartment_id: int
@@ -19,6 +20,20 @@ class ApartmentData(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class Apartment(BaseModel):
+    id: int
+    title: str
+    address: str
+    rooms: int
+    area: int
+    latitude: float
+    longitude: float
+
+    class Config:
+        from_attributes = True
+
 
 
 class ReservationNotification(BaseModel):

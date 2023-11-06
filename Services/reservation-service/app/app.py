@@ -85,7 +85,7 @@ async def add_Reservation(
         Reservation: Reservation,
         db: Session = Depends(get_db)
     ) -> Reservation:
-    item = crud.add_reservation_item(db, Reservation, message_producer)
+    item = await crud.add_reservation_item(db, Reservation, message_producer)
     if item is not None:
         return item
     return JSONResponse(status_code=404, content={"message": f"Элемент с id {Reservation.id} уже существует в списке."})

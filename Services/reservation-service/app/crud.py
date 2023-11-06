@@ -1,8 +1,11 @@
-from .schemas import Reservation, ReservationNotification, ApartmentData
+import aiohttp
+from .schemas import Reservation, ReservationNotification, ApartmentData, Apartment
 from sqlalchemy.orm import Session
 from .database import models
 from .broker import MessageProducer
+from . import config
 
+cfg: config.Config = config.load_config()
 
 def get_reservation_items(db: Session, limit: int = 1, offset: int = 0):
     return db.query(models.Reservation) \
@@ -17,7 +20,14 @@ def get_reservation_item(db: Session, item_id: int):
         .first()
 
 
-def add_reservation_item(db: Session, item: Reservation, message_producer: MessageProducer):
+async def fetch_apartment_data(apartment_id):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"{cfg.APARTMENT_SERVICE_DSN}apartments/{apartment_id}") as response:
+            apartment_data = await response.json()
+    return apartment_data
+
+
+async def add_reservation_item(db: Session, item: Reservation, message_producer: MessageProducer):
 
     db_item = models.Reservation(
         id=item.id,
@@ -26,19 +36,22 @@ def add_reservation_item(db: Session, item: Reservation, message_producer: Messa
         apartment_id=item.apartment_id
     )
 
-    apd = ApartmentData(
-        title='title',
-        address='address'
+    apartment = await fetch_apartment_data(item.apartment_id)
+    apartment = Apartment(**apartment)
+
+    apartment_data = ApartmentData(
+        title=apartment.title,
+        address=apartment.address
     )
 
-    rn = ReservationNotification(
-        email='email',
+    reservation_notification = ReservationNotification(
+        email=item.email,
         arrival_date=item.arrival_date,
         departure_date=item.departure_date,
-        apartment_data=apd
+        apartment_data=apartment_data
     )
 
-    message_producer.send_message(rn.json())
+    message_producer.send_message(reservation_notification.json())
 
     db.add(db_item)
     db.commit()

@@ -11,6 +11,9 @@ services:
     - name: review-service
       entrypoint: http://review-service:5004/
       inject_token_in_swagger: True
+    - name: reservation-service
+      entrypoint: http://reservation-service:5005/
+      inject_token_in_swagger: True
 model: |
     [request_definition]
     r = sub, obj, act
@@ -46,6 +49,11 @@ policies:
       rule: r.sub.group_id == 1
       resource: /reviews*
       methods: (GET)|(POST)|(PUT)|(DELETE)
+    - service: reservation-service
+      rule: r.sub.group_id == 1
+      resource: /reservations*
+      methods: (GET)|(POST)|(PUT)|(DELETE)
+
 
       #Арендадатель
     - service: apartment-service

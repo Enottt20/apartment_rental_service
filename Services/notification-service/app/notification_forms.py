@@ -1,8 +1,8 @@
-from .schemas import ReservationNotification
+import schemas
 
 
 def reservation_notification_message(
-        message: ReservationNotification
+        message: schemas.ReservationNotification
 ) -> str:
     msg = (f'Вы арендовали {message.apartment_data.title} \n'\
            f'по адрессу {message.apartment_data.address} \n'\
