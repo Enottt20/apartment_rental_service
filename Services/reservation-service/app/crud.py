@@ -22,7 +22,7 @@ def get_reservation_item(db: Session, item_id: int):
 
 async def fetch_apartment_data(apartment_id):
     async with aiohttp.ClientSession() as session:
-        async with session.get(f"{cfg.APARTMENT_SERVICE_DSN}apartments/{apartment_id}") as response:
+        async with session.get(f"{cfg.APARTMENT_SERVICE_ENTRYPOINT}apartments/{apartment_id}") as response:
             apartment_data = await response.json()
     return apartment_data
 

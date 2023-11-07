@@ -9,10 +9,10 @@ class Config(BaseSettings):
         alias='POSTGRES_DSN'
     )
 
-    APARTMENT_SERVICE_DSN: str = Field(
+    APARTMENT_SERVICE_ENTRYPOINT: str = Field(
         default='http://localhost:5002/apartments/',
-        env='APARTMENT_SERVICE_DSN',
-        alias='APARTMENT_SERVICE_DSN'
+        env='APARTMENT_SERVICE_ENTRYPOINT',
+        alias='APARTMENT_SERVICE_ENTRYPOINT'
     )
 
     RABBITMQ_DSN: AmqpDsn = Field(
