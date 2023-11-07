@@ -86,13 +86,13 @@ policies:
       rule: r.sub.group_id == 3
       resource: /reviews*
       methods: (GET)|(POST)|(PUT)|(DELETE)
+    - service: user-service
+      rule: r.sub.group_id == 3
+      resource: /groups*
+      methods: (GET)|(POST)|(PUT)|(DELETE)
 
       #общее
     - service: user-service
       resource: /auth/*
       methods: POST
       white_list: true
-    - service: user-service
-      white_list: true
-      resource: /groups*
-      methods: (GET)|(POST)|(PUT)|(DELETE)
