@@ -56,6 +56,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "5001:5001"
+    depends_on:
+      - postgresql
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
     
@@ -66,6 +68,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "5002:5002"
+    depends_on:
+      - postgresql
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
     
@@ -76,6 +80,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "5003:5003"
+    depends_on:
+      - postgresql
     environment:
       POSTGRES_DSN: ${POSTGRES_DB_ASYNC_DSN}
       JWT_SECRET: ${JWT_SECRET}
@@ -89,6 +95,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "5004:5004"
+    depends_on:
+      - mongo
     environment:
       MONGO_DSN: ${MONGO_DSN}
 
@@ -100,6 +108,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "5005:5005"
+    depends_on:
+      - postgresql
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
       APARTMENT_SERVICE_ENTRYPOINT: ${APARTMENT_SERVICE_ENTRYPOINT}
@@ -115,6 +125,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "5006:5006"
+    depends_on:
+      - rabbitmq
     environment:
       QUEUE_NAME: ${QUEUE_NAME_NOTIFICATION}
       RABBITMQ_DSN: ${RABBITMQ_DSN}
