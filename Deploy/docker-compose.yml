@@ -39,7 +39,7 @@ services:
 
   policy-enforcement-service:
     build:
-      context: ../services/policy-enforcement-service
+      context: ../Services/policy-enforcement-service
       dockerfile: ./Dockerfile
     ports:
       - "5100:5100"
@@ -52,7 +52,7 @@ services:
 
   favorite-service:
     build:
-      context: ../services/favorite-service
+      context: ../Services/favorite-service
       dockerfile: ./Dockerfile
     ports:
       - "5001:5001"
@@ -64,7 +64,7 @@ services:
 
   apartment-service:
     build:
-      context: ../services/apartment-service
+      context: ../Services/apartment-service
       dockerfile: ./Dockerfile
     ports:
       - "5002:5002"
@@ -76,7 +76,7 @@ services:
 
   user-service:
     build:
-      context: ../services/user-service
+      context: ../Services/user-service
       dockerfile: ./Dockerfile
     ports:
       - "5003:5003"
@@ -91,7 +91,7 @@ services:
 
   review-service:
     build:
-      context: ../services/review-service
+      context: ../Services/review-service
       dockerfile: ./Dockerfile
     ports:
       - "5004:5004"
@@ -104,7 +104,7 @@ services:
   
   reservation-service:
     build:
-      context: ../services/reservation-service
+      context: ../Services/reservation-service
       dockerfile: ./Dockerfile
     ports:
       - "5005:5005"
@@ -121,7 +121,7 @@ services:
 
   notification-service:
     build:
-      context: ../services/notification-service
+      context: ../Services/notification-service
       dockerfile: ./Dockerfile
     ports:
       - "5006:5006"

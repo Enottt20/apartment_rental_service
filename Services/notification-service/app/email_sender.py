@@ -13,12 +13,12 @@ class EmailSender():
         self.smtp_port = smtp_port
 
         try:
-            self.server = smtplib.SMTP(smtp_server, smtp_port)
+            self.server = smtplib.SMTP_SSL(smtp_server, smtp_port)
             self.server.starttls()
             self.server.login(smtp_username, smtp_password)
 
         except:
-            logger.info("соединение с SMTP не установленно")
+            logger.info("соединение с сервером не установленно")
 
 
     def send_message(self, subject, message, recipient_email):
