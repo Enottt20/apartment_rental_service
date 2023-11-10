@@ -22,6 +22,12 @@ class Config(BaseSettings):
         alias='EMAIL_LOGIN'
     )
 
+    IS_SMPT_SSL: bool = Field(
+        default=False,
+        env='IS_SMPT_SSL',
+        alias='IS_SMPT_SSL'
+    )
+
     EMAIL_PASSWORD: str = Field(
         default='EMAIL_PASSWORD',
         env='EMAIL_PASSWORD',
