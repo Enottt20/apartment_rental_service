@@ -1,3 +1,0 @@
-alembic revision --autogenerate -m "MESSAGE"
-
-alembic upgrade head
