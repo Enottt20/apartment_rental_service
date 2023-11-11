@@ -11,7 +11,7 @@ class EmailSender():
         self.smtp_username = smtp_username
 
         try:
-            if is_smtp_ssl == 1:
+            if is_smtp_ssl:
                 self.server = smtplib.SMTP_SSL(smtp_server, smtp_port)
                 self.server.login(smtp_username, smtp_password)
             else:
