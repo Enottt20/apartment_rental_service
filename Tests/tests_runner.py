@@ -26,6 +26,5 @@ def run_all_scripts(script_paths):
 if __name__ == "__main__":
     tests_directory = "e2e_tests"
 
-    logger.info("Tests will run after 15 seconds")
-    timer = Timer(1, run_all_scripts_in_directory, args=(tests_directory,))
-    timer.start()
+    logger.info("Tests run")
+    run_all_scripts_in_directory(tests_directory)
