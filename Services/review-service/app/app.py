@@ -10,9 +10,6 @@ from .database import MongoDB
 from .schemas import ReviewUpdate, ReviewCreate, Review
 
 
-################
-## INITIALIZE ##
-################
 logger = logging.getLogger("review-service")
 logging.basicConfig(level=logging.INFO, 
                     format="[%(levelname)s][%(name)s][%(filename)s, line %(lineno)d]: %(message)s")

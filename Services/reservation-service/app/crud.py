@@ -31,6 +31,7 @@ async def add_reservation_item(db: Session, item: Reservation, message_producer:
 
     db_item = models.Reservation(
         id=item.id,
+        email=item.email,
         arrival_date=item.arrival_date,
         departure_date=item.departure_date,
         apartment_id=item.apartment_id

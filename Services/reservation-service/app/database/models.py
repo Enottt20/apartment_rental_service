@@ -8,6 +8,7 @@ class Reservation(Base):
     __tablename__ = 'reservation'
 
     id = Column(Integer, primary_key=True, index=True)
+    email = Column(String)
     arrival_date = Column(DateTime, default=datetime.datetime.utcnow)
     departure_date = Column(DateTime, default=datetime.datetime.utcnow)
     apartment_id = Column(Integer)
