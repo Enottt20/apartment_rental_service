@@ -1,11 +1,18 @@
 from pydantic_settings import BaseSettings
-from pydantic import PostgresDsn, Field, Extra, SecretStr
+from pydantic import PostgresDsn, Field, Extra, SecretStr, FilePath
+
 
 class Config(BaseSettings):
     POSTGRES_DSN: PostgresDsn = Field(
         default='postgresql+asyncpg://postgres:postgres@localhost:5432/postgres',
         env='POSTGRES_DSN',
         alias='POSTGRES_DSN'
+    )
+
+    default_groups_config_path: FilePath = Field(
+        default='default-groups.json',
+        env='DEFAULT_GROUPS_CONFIG_PATH',
+        alias='DEFAULT_GROUPS_CONFIG_PATH'
     )
 
     jwt_secret: SecretStr = Field(

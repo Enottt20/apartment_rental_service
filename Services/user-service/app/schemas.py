@@ -24,6 +24,12 @@ class GroupUpdate(BaseModel):
         from_attributes = True
 
 
+class GroupUpsert(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        orm_mode = True
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
     username: str | None = None

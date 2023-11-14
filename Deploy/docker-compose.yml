@@ -82,13 +82,16 @@ services:
       - "5003:5003"
     depends_on:
       - postgresql
+    volumes:
+      - user-service-data:/mnt/
     environment:
       POSTGRES_DSN: ${POSTGRES_DB_ASYNC_DSN}
       JWT_SECRET: ${JWT_SECRET}
       RESET_PASSWORD_TOKEN_SECRET: ${RESET_PASSWORD_TOKEN_SECRET}
       VERIFICATION_TOKEN_SECRET: ${VERIFICATION_TOKEN_SECRET}
-    
+      DEFAULT_GROUPS_CONFIG_PATH: ${DEFAULT_GROUPS_CONFIG_PATH}
 
+    
   review-service:
     build:
       context: ../Services/review-service
@@ -162,3 +165,9 @@ volumes:
       o: bind
       type: none
       device: ./policy-enforcement-data
+  user-service-data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ./user-service

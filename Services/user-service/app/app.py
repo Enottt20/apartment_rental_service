@@ -1,17 +1,12 @@
 import typing, logging
-
 from fastapi import FastAPI, Depends
 from fastapi.responses import JSONResponse
-
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from . import database, config, schemas, crud
-
 from .auth import AuthInitializer, include_routers
+import json
 
-##===============##
-## Инициализация ##
-##===============##
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=20,
@@ -42,6 +37,19 @@ async def on_startup():
     await database.DB_INITIALIZER.init_db(
         str(cfg.POSTGRES_DSN)
     )
+
+    groups = []
+    with open(cfg.default_groups_config_path) as f:
+        groups = json.load(f)
+
+    if groups is not None:
+        async for session in database.get_async_session():
+            for group in groups:
+                await crud.upsert_group(
+                    session, schemas.GroupUpsert(**group)
+                )
+    else:
+        logger.error('Конфигурация с группами не была загружена')
 
 
 @app.post(
