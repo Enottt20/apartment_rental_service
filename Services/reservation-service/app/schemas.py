@@ -1,11 +1,11 @@
 from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class Reservation(BaseModel):
     id: int
-    email: str
+    email: EmailStr
     arrival_date: datetime
     departure_date: datetime
     apartment_id: int
@@ -37,7 +37,7 @@ class Apartment(BaseModel):
 
 
 class ReservationNotification(BaseModel):
-    email: str
+    email: EmailStr
     arrival_date: datetime
     departure_date: datetime
     apartment_data: ApartmentData

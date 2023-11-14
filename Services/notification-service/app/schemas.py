@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class ApartmentData(BaseModel):
@@ -11,7 +11,7 @@ class ApartmentData(BaseModel):
 
 
 class ReservationNotification(BaseModel):
-    email: str
+    email: EmailStr
     arrival_date: datetime
     departure_date: datetime
     apartment_data: ApartmentData

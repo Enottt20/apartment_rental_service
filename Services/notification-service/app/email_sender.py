@@ -21,8 +21,8 @@ class EmailSender():
 
             logger.info("соединение с сервером установленно")
 
-        except:
-            logger.error("соединение с сервером не установленно")
+        except Exception as e:
+            logger.error(f"Ошибка при подключении к серверу: {e}")
 
     def send_message(self, subject, message, recipient_email):
         try:
@@ -36,5 +36,6 @@ class EmailSender():
             self.server.sendmail(self.smtp_username, recipient_email, msg.as_string())
 
             logger.info("Сообщение отправлено успешно.")
-        except:
-            logger.error("Сообщение не было отправленно")
+        except Exception as e:
+            logger.error(f"Ошибка при отправке сообщения: {e}")
+
