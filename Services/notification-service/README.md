@@ -29,9 +29,12 @@ SMTP_SERVER=smtp.gmail.com
 IS_SMPT_SSL=False
 ```
 
-
-
 Сервис так же может работать без почты. Будет просто писать логи
+
+# Запуск тестов
+```bash
+python -m unittest
+```
 
 Для запуска нужно перейти в Deploy:
 ```bash

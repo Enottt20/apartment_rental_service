@@ -18,6 +18,11 @@
 - uvicorn app:app --port 8002 --reload - запуск сервиса с помощью Uvicorn на порту 8002 с автоматической перезагрузкой при изменении кода.
 - ./run.sh - запуск сервиса с помощью скрипта run.sh.
 
+# Запуск тестов
+```bash
+python -m unittest
+```
+
 ### Сборкра docker образа
 ```bash
 docker build -t "apartment-service:1.0" .

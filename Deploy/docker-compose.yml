@@ -4,23 +4,34 @@ services:
     image: postgis/postgis:latest
     container_name: postgis
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}  # Имя вашей базы данных
-      POSTGRES_USER: ${POSTGRES_USER}    # Имя пользователя базы данных
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Пароль пользователя базы данных
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - 5432:5432  # Маппинг портов (локальный порт: порт в контейнере)
+      - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "home-automation"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
 
   rabbitmq:
-    image: "rabbitmq:3-management"  # Используем образ с веб-интерфейсом для удобного мониторинга
+    image: "rabbitmq:3-management"
     ports:
       - "5672:5672"  # Порт для AMQP
       - "15672:15672"  # Порт для веб-интерфейса
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     
 
   mongo:
@@ -34,7 +45,6 @@ services:
       MONGO_INITDB_DATABASE: mongo
       MONGO_USER: ${MONGO_USER}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
-    
 
 
   policy-enforcement-service:
@@ -54,34 +64,48 @@ services:
     build:
       context: ../Services/favorite-service
       dockerfile: ./Dockerfile
+    restart: unless-stopped
     ports:
       - "5001:5001"
     depends_on:
-      - postgresql
+      postgresql:
+        condition: service_healthy
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
+    
     
 
   apartment-service:
     build:
       context: ../Services/apartment-service
       dockerfile: ./Dockerfile
+    restart: unless-stopped
     ports:
       - "5002:5002"
     depends_on:
-      - postgresql
+      postgresql:
+        condition: service_healthy
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 10s
+      timeout: 15s
+      retries: 7
+      start_period: 30s
+
     
 
   user-service:
     build:
       context: ../Services/user-service
       dockerfile: ./Dockerfile
+    restart: unless-stopped
     ports:
       - "5003:5003"
     depends_on:
-      - postgresql
+      postgresql:
+        condition: service_healthy
     volumes:
       - user-service-data:/mnt/
     environment:
@@ -109,10 +133,12 @@ services:
     build:
       context: ../Services/reservation-service
       dockerfile: ./Dockerfile
+    restart: unless-stopped
     ports:
       - "5005:5005"
     depends_on:
-      - postgresql
+      postgresql:
+        condition: service_healthy
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
       APARTMENT_SERVICE_ENTRYPOINT: ${APARTMENT_SERVICE_ENTRYPOINT}
@@ -129,7 +155,8 @@ services:
     ports:
       - "5006:5006"
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
     environment:
       QUEUE_NAME: ${QUEUE_NAME_NOTIFICATION}
       RABBITMQ_DSN: ${RABBITMQ_DSN}
@@ -145,14 +172,12 @@ services:
       context: ../Tests
       dockerfile: ./Dockerfile
     depends_on:
-      - policy-enforcement-service
-      - apartment-service
+      apartment-service:
+        condition: service_healthy
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
       APARTMENT_SERVICE_ENTRYPOINT: ${APARTMENT_SERVICE_ENTRYPOINT}
       POLICY_SERVICE_ENTRYPOINT: ${POLICY_SERVICE_ENTRYPOINT}
-
-
     
 
 

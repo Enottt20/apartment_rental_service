@@ -18,7 +18,6 @@ def geocode_city(city_name):
             "lat": float(data[0]["lat"]),
             "lng": float(data[0]["lon"])
         }
-        print(city_coords)
         return city_coords
     else:
         return None

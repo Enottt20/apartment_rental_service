@@ -23,6 +23,7 @@ logger.info(
 consumer = broker.Consumer(str(cfg.RABBITMQ_DSN), str(cfg.QUEUE_NAME))
 
 email_send = email_sender.EmailSender(cfg.EMAIL_LOGIN, cfg.EMAIL_PASSWORD, cfg.IS_SMPT_SSL, cfg.SMTP_SERVER, cfg.SMTP_PORT)
+email_send.connect_to_server()
 
 def send_email_message(body, message: Message):
     data = json.loads(body)

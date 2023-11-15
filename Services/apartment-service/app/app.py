@@ -38,6 +38,12 @@ def get_db():
     finally:
         db.close()
 
+
+@app.get("/health")
+def read_health():
+    return {"status": "ok"}
+
+
 @app.get(
     "/apartments/{apartment_id}", status_code=201, response_model=Apartment,
     summary='По айди получить apartment',
