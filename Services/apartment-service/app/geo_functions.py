@@ -10,7 +10,7 @@ def geocode_city(city_name):
         "format": "json",
     }
 
-    response = requests.get(base_url, params=params)
+    response = requests.get(base_url, params=params, timeout=10)
     data = response.json()
 
     if data and len(data) > 0:

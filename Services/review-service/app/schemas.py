@@ -19,7 +19,8 @@ class ObjectIdPydanticAnnotation:
 
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type, _handler) -> core_schema.CoreSchema:
-        assert source_type is str
+        if source_type is not str:
+            raise ValueError("source_type must be a string.")
         return core_schema.no_info_wrap_validator_function(
             cls.validate_object_id,
             core_schema.str_schema(),
