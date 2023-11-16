@@ -39,7 +39,7 @@ def get_db():
         db.close()
 
 
-@app.get("/health")
+@app.get("/health", tags=['apartments'])
 def read_health():
     return {"status": "ok"}
 

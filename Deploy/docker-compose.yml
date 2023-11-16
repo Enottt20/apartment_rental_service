@@ -12,9 +12,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "home-automation"]
-      interval: 10s
-      timeout: 10s
+      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
+      interval: 35s
+      timeout: 120s
       retries: 5
       start_period: 30s
 
@@ -53,6 +53,12 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - "5100:5100"
+    depends_on:
+      - favorite-service
+      - apartment-service
+      - user-service
+      - review-service
+      - reservation-service
     volumes:
       - policy-enforcement-data:/mnt/
     environment:
@@ -90,8 +96,8 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
       interval: 10s
-      timeout: 15s
-      retries: 7
+      timeout: 10s
+      retries: 5
       start_period: 30s
 
     
@@ -172,8 +178,8 @@ services:
       context: ../Tests
       dockerfile: ./Dockerfile
     depends_on:
-      apartment-service:
-        condition: service_healthy
+      - apartment-service
+      - policy-enforcement-service
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN}
       APARTMENT_SERVICE_ENTRYPOINT: ${APARTMENT_SERVICE_ENTRYPOINT}

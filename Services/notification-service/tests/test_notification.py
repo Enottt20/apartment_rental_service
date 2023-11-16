@@ -1,9 +1,8 @@
-import imaplib
 import unittest
 from app.email_sender import EmailSender
-import app.config as config
+from app.config import Config, load_config
 
-cfg: config.Config = config.load_config()
+cfg: Config = load_config()
 
 class TestEmailSender(unittest.TestCase):
     def setUp(self):
