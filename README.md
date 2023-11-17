@@ -1,6 +1,6 @@
 # Инструкция по запуску процесса поиска уязвимостей
 
-## Анализ исходного кода сервисов
+## Анализ исходного кода сервисов с помощью Bandit
 1) Установить bandit:
 ```sh
 pip install bandit
@@ -10,7 +10,7 @@ pip install bandit
 python3 -m bandit -r ./dir
 ```
 
-## Анализ докер образов
+## Анализ докер образов с помощью Trivy
 Нужно просто запустить эту команду и вписать название интересующего образа вместо IMAGE_NAME
 ```sh
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image IMAGE_NAME
