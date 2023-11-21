@@ -10,3 +10,12 @@ def reservation_notification_message(
            f'по {message.departure_date} ')
 
     return msg
+
+def review_notification_message(
+        message: schemas.ReviewNotification
+) -> str:
+    msg = (f'Вам оставили отзыв - \n '\
+           f'{message.title} \n'\
+           f'{message.description} \n')
+
+    return msg

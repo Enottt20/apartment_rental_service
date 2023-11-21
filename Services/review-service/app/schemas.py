@@ -1,4 +1,4 @@
-from pydantic import BaseModel, BaseConfig, Field, validator
+from pydantic import BaseModel, EmailStr
 from pydantic_core import core_schema
 from pydantic.json_schema import JsonSchemaValue
 from typing import Optional, List, Any, Annotated
@@ -47,15 +47,28 @@ class ObjectIdStr(str):
     def __modify_schema__(cls, field_schema):
         field_schema.update(format='ObjectId')
 
+
 class ReviewBase(BaseModel):
+    apartment_id: int
+    user_email: EmailStr
     title: str
     description: str
+
+
+class ReviewNotification(BaseModel):
+    email: EmailStr
+    title: str
+    description: str
+
 
 class ReviewCreate(ReviewBase):
     pass
 
-class ReviewUpdate(ReviewBase):
-    pass
+
+class ReviewUpdate(BaseModel):
+    title: str
+    description: str
+
 
 class Review(ReviewBase):
     id: Annotated[str, ObjectIdPydanticAnnotation]

@@ -1,4 +1,4 @@
-from .schemas import Apartment, ApartmentsQuery
+from .schemas import ApartmentsQuery, ApartmentCreate, ApartmentUpdate
 from sqlalchemy.orm import Session
 from .database import models
 from sqlalchemy import func
@@ -38,45 +38,26 @@ def get_apartments(db: Session, apartments_query: ApartmentsQuery):
     return apartments
 
 
-def add_apartment(db: Session, apartment: Apartment):
-    db_item = models.Apartment(
-        id=apartment.id,
-        title=apartment.title,
-        address=apartment.address,
-        rooms=apartment.rooms,
-        area=apartment.area,
-        latitude=apartment.latitude,
-        longitude=apartment.longitude,
-        location=f'POINT({apartment.latitude} {apartment.longitude})'
-    )
-
-    # Если обьект уже существует то дальше не идем
-    if get_apartment(db=db, apartment_id=apartment.id):
-        return None
+def add_apartment(db: Session, apartment: ApartmentCreate):
+    db_item = models.Apartment(**apartment.model_dump())
+    db_item.location = f'POINT({apartment.latitude} {apartment.longitude})'
 
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
 
-    return apartment
+    return db_item
 
 
-def update_apartment(db: Session, apartment_id: int, updated_apartment: Apartment):
-    # Получаем существующую запись квартиры по ID
+def update_apartment(db: Session, apartment_id: int, updated_apartment: ApartmentUpdate):
     db_apartment = db.query(models.Apartment).filter(models.Apartment.id == apartment_id).first()
 
     if db_apartment:
-        # Обновляем поля квартиры на основе данных из updated_apartment
-        db_apartment.id = updated_apartment.id
-        db_apartment.address = updated_apartment.address
-        db_apartment.title = updated_apartment.title
-        db_apartment.rooms = updated_apartment.rooms
-        db_apartment.area = updated_apartment.area
-        db_apartment.latitude = updated_apartment.latitude
-        db_apartment.longitude = updated_apartment.longitude
+        for attr, value in updated_apartment.dict().items():
+            setattr(db_apartment, attr, value)
+
         db_apartment.location = f'POINT({updated_apartment.latitude} {updated_apartment.longitude})'
 
-        # Сохраняем обновленную запись
         db.commit()
         return db_apartment
 

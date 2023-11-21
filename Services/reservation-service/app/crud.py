@@ -1,5 +1,5 @@
 import aiohttp
-from .schemas import Reservation, ReservationNotification, ApartmentData, Apartment
+from .schemas import Reservation, ReservationNotification, ApartmentData
 from sqlalchemy.orm import Session
 from .database import models
 from .broker import MessageProducer
@@ -20,7 +20,7 @@ def get_reservation_item(db: Session, item_id: int):
         .first()
 
 
-async def fetch_apartment_data(apartment_id):
+async def fetch_apartment_email(apartment_id: int) -> dict:
     async with aiohttp.ClientSession() as session:
         async with session.get(f"{cfg.APARTMENT_SERVICE_ENTRYPOINT}apartments/{apartment_id}") as response:
             apartment_data = await response.json()
@@ -37,12 +37,14 @@ async def add_reservation_item(db: Session, item: Reservation, message_producer:
         apartment_id=item.apartment_id
     )
 
-    apartment = await fetch_apartment_data(item.apartment_id)
-    apartment = Apartment(**apartment)
+    apartment: dict  = await fetch_apartment_email(item.apartment_id)
+    title = apartment.get('title', None)
+    address = apartment.get('address', None)
+
 
     apartment_data = ApartmentData(
-        title=apartment.title,
-        address=apartment.address
+        title=title,
+        address=address
     )
 
     reservation_notification = ReservationNotification(

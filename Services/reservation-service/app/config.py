@@ -10,7 +10,7 @@ class Config(BaseSettings):
     )
 
     APARTMENT_SERVICE_ENTRYPOINT: str = Field(
-        default='http://localhost:5002/apartments/',
+        default='http://localhost:5002/',
         env='APARTMENT_SERVICE_ENTRYPOINT',
         alias='APARTMENT_SERVICE_ENTRYPOINT'
     )
@@ -31,24 +31,6 @@ class Config(BaseSettings):
         default='notification',
         env='EXCHANGE_NAME',
         alias='EXCHANGE_NAME'
-    )
-
-    POSTGRES_PASSWORD: str = Field(
-        default='1111',
-        env='POSTGRES_PASSWORD',
-        alias='POSTGRES_PASSWORD'
-    )
-
-    POSTGRES_USER: str = Field(
-        default='postgres',
-        env='POSTGRES_USER',
-        alias='POSTGRES_USER'
-    )
-
-    POSTGRES_DB: str = Field(
-        default='postgres',
-        env='POSTGRES_DB',
-        alias='POSTGRES_DB'
     )
 
     class Config:

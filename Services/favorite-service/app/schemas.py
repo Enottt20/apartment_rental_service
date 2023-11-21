@@ -1,19 +1,21 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
-# class Apartment(BaseModel):
-#     id: int
-#     address: str
-#     rooms: int
-#     area: int
-#
-#     class Config:
-#         from_attributes = True
 
-class FavoriteItem(BaseModel):
-    id: int
-    name: str
-    description: str
+class BaseFavoriteItem(BaseModel):
     apartment_id: int
+    user_email: EmailStr
+
+
+class FavoriteItem(BaseFavoriteItem):
+    id: int
 
     class Config:
         from_attributes = True
+
+
+class FavoriteItemCreate(BaseFavoriteItem):
+    pass
+
+
+class FavoriteItemDelete(BaseFavoriteItem):
+    pass

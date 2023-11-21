@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 
 class MessageProducer():
-    def __init__(self, dsn, queue_name="notification", exchange_name="notification"):
+    def __init__(self, dsn, queue_name="review notification", exchange_name="notification"):
         self.dsn = dsn
         self.queue_name = queue_name
         self.exchange = Exchange(exchange_name)
@@ -16,3 +16,4 @@ class MessageProducer():
             producer = connection.Producer()
             producer.publish(message, exchange=self.exchange, routing_key=self.queue_name)
             logger.info(f'send message {message}')
+

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
-from fastapi.responses import JSONResponse
+from pydantic import EmailStr
 from starlette.responses import JSONResponse
-from .schemas import FavoriteItem
+from .schemas import FavoriteItem, FavoriteItemCreate, FavoriteItemDelete
 from sqlalchemy.orm import Session
 from . import crud, config
 import typing
@@ -48,7 +48,7 @@ async def get_favorite_item(
         item_id: int,
         db: Session = Depends(get_db)
     ) -> FavoriteItem:
-    item = crud.get_favorite_item(db, item_id)
+    item = crud.get_favorite_item_by_id(db, item_id)
     if item is not None:
         return item
     return JSONResponse(status_code=404, content={"message": "Item not found"})
@@ -56,16 +56,17 @@ async def get_favorite_item(
 
 @app.get(
     "/favorites",
-    summary='Возвращает список favorite items',
+    summary='Возвращает список favorite items по почте пользователя',
     response_model=list[FavoriteItem],
     tags=['favorites']
 )
 async def get_favorite_items(
+        user_email: EmailStr,
         limit: int = 1,
         offset: int = 0,
         db: Session = Depends(get_db)
     ) -> typing.List[FavoriteItem]:
-    return crud.get_favorite_items(db, limit=limit, offset=offset)
+    return crud.get_favorite_items_by_user_email(db, user_email=user_email, limit=limit, offset=offset)
 
 
 @app.post(
@@ -76,29 +77,10 @@ async def get_favorite_items(
     tags=['favorites']
 )
 async def add_favorite_item(
-        favorite_item: FavoriteItem,
+        favorite_item: FavoriteItemCreate,
         db: Session = Depends(get_db)
     ) -> FavoriteItem:
-    item = crud.add_favorite_item(db, favorite_item)
-    if item is not None:
-        return item
-    return JSONResponse(status_code=404, content={"message": f"Элемент с id {favorite_item.id} уже существует в списке."})
-
-
-@app.put(
-    "/favorites/{favoriteId}",
-    summary='Обновляет информацию об favorite item',
-    tags=['favorites']
-)
-async def update_favorite_item(
-        favoriteId: int,
-        updated_item: FavoriteItem,
-        db: Session = Depends(get_db)
-    ) -> FavoriteItem:
-    item = crud.update_favorite_item(db, favoriteId, updated_item)
-    if item is not None:
-        return item
-    return JSONResponse(status_code=404, content={"message": "Item not found"})
+    return crud.add_favorite_item(db, favorite_item)
 
 @app.delete(
     "/favorites/{favoriteId}",
@@ -106,10 +88,10 @@ async def update_favorite_item(
     tags=['favorites']
 )
 async def delete_favorite_item(
-        favoriteId: int,
+        favorite_item: FavoriteItemDelete,
         db: Session = Depends(get_db)
     ) -> FavoriteItem:
-    if crud.delete_favorite_item(db, favoriteId):
+    if crud.delete_favorite_item(db, favorite_item):
         return JSONResponse(status_code=200, content={"message": "Item successfully deleted"})
     return JSONResponse(status_code=404, content={"message": "Item not found"})
 

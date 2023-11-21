@@ -1,39 +1,57 @@
+import aiohttp
 from starlette.responses import JSONResponse
 
-from .schemas import ReviewUpdate, ReviewCreate, Review
+from .schemas import ReviewUpdate, ReviewCreate, Review, ReviewNotification
 from .database import models
 from typing import List
+from .broker import MessageProducer
+from . import config
+
+cfg: config.Config = config.load_config()
 
 
-def get_reviews(skip: int = 0, limit: int = 10) -> List[models.Review]:
-    return models.Review.objects \
-        .skip(skip) \
-        .limit(limit)
+async def fetch_apartment_email(apartment_id: int) -> dict:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"{cfg.APARTMENT_SERVICE_ENTRYPOINT}apartments/{apartment_id}") as response:
+            apartment_data = await response.json()
+    return apartment_data
 
 
-def add_review(review: ReviewCreate) -> models.Review:
-    new_review = models.Review(**review.model_dump())
-    new_review.save()
-
-    return new_review
+def get_reviews_by_apartment_id(apartment_id: int, skip: int = 0, limit: int = 10) -> List[models.Review]:
+    reviews = models.Review.objects(apartment_id=apartment_id).skip(skip).limit(limit)
+    return reviews
 
 
-def db_model_to_review(review: models.Review) -> Review:
-    return Review(
-        id=review.id,
+async def add_review(review: ReviewCreate, message_producer: MessageProducer) -> models.Review:
+    existing_review = models.Review.objects(apartment_id=review.apartment_id, user_email=review.user_email).first()
+
+    if existing_review:
+        return None
+
+    apartment_data: dict = await fetch_apartment_email(review.apartment_id)
+    email = apartment_data.get('publisher_email', None)
+
+    review_notification = ReviewNotification(
+        email=email,
         title=review.title,
         description=review.description
     )
+
+    message_producer.send_message(review_notification.json())
+
+    new_review = models.Review(**review.model_dump())
+    new_review.save()
+    return new_review
 
 
 def get_review_by_uid(uid: str) -> Review:
     review = models.Review.objects(id=uid).first()
 
     if review is not None:
-        return db_model_to_review(review)
+        return review
 
 
-def update_review_by_uid(uid: str, review_update: ReviewUpdate) -> Review:
+def update_review_by_uid(uid: str, review_update: ReviewUpdate) -> ReviewUpdate:
     review = models.Review.objects(id=uid).first()
 
     if review is None:
@@ -43,7 +61,7 @@ def update_review_by_uid(uid: str, review_update: ReviewUpdate) -> Review:
     review.description = review_update.description
 
     review.save()
-    return db_model_to_review(review)
+    return review
 
 
 def remove_review_by_uid(uid: str):

@@ -1,51 +1,50 @@
-from .schemas import FavoriteItem
+from .schemas import FavoriteItemCreate, FavoriteItemDelete
 from sqlalchemy.orm import Session
 from .database import models
 
 
-def get_favorite_items(db: Session, limit: int = 1, offset: int = 0):
+def get_favorite_items_by_user_email(db: Session, user_email: str, limit: int = 1, offset: int = 0):
     return db.query(models.FavoriteItem) \
+        .filter(models.FavoriteItem.user_email == user_email) \
         .offset(offset) \
         .limit(limit) \
         .all()
 
 
-def get_favorite_item(db: Session, item_id: int):
+def get_favorite_item_by_id(db: Session, item_id: int):
     return db.query(models.FavoriteItem) \
         .filter(models.FavoriteItem.id == item_id) \
         .first()
 
 
-def add_favorite_item(db: Session, item: FavoriteItem):
+def add_favorite_item(db: Session, item: FavoriteItemCreate):
 
-    db_item = models.FavoriteItem(
-        id=item.id,
-        name=item.name,
-        description=item.description,
-        apartment_id=item.apartment_id
-    )
+    # Проверка, есть ли уже такой товар в избранном у пользователя
+    existing_favorite = db.query(models.FavoriteItem).filter(
+        models.FavoriteItem.user_email == item.user_email,
+        models.FavoriteItem.apartment_id == item.apartment_id
+    ).first()
 
+    if existing_favorite:
+        # Если товар уже в избранном, не добавляем его повторно
+        return existing_favorite
+
+    db_item = models.FavoriteItem(**item.model_dump())
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
 
-    return item
+    return db_item
 
 
-def update_favorite_item(db: Session, item_id: int, updated_item: FavoriteItem):
-    result = db.query(models.FavoriteItem) \
-        .filter(models.FavoriteItem.id == item_id) \
-        .update(updated_item.dict())
-    db.commit()
-
-    if result == 1:
-        return updated_item
-    return None
-
-
-def delete_favorite_item(db: Session, item_id: int):
-    result = db.query(models.FavoriteItem) \
-        .filter(models.FavoriteItem.id == item_id) \
+def delete_favorite_item(db: Session, item: int):
+    db_favorite_item = (
+        db.query(models.FavoriteItem)
+        .filter(
+            models.FavoriteItem.user_email == item.user_email,
+            models.FavoriteItem.apartment_id == item.apartment_id
+        )
         .delete()
+    )
     db.commit()
-    return result == 1
+    return db_favorite_item == 1

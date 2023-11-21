@@ -30,7 +30,7 @@ SessionLocal = DB_INITIALIZER.init_database(str(cfg.POSTGRES_DSN))
 message_producer = broker.MessageProducer(
     dsn=cfg.RABBITMQ_DSN.unicode_string(),
     exchange_name=cfg.EXCHANGE_NAME,
-    queue_name=cfg.QUEUE_NAME,
+    queue_name='notification apartment rental',
 )
 
 

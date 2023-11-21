@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, Query
 from starlette.responses import JSONResponse
-from .schemas import Apartment, ApartmentsQuery
+from .schemas import Apartment, ApartmentsQuery, ApartmentCreate, ApartmentUpdate
 from sqlalchemy.orm import Session
 from . import crud, config
 import typing
@@ -103,23 +103,20 @@ async def get_apartments(
     tags=['apartments']
 )
 async def add_apartment(
-        apartment: Apartment,
+        apartment: ApartmentCreate,
         db: Session = Depends(get_db)
     ) -> Apartment:
-    item = crud.add_apartment(db, apartment)
-    if item is not None:
-        return item
-    return JSONResponse(status_code=404, content={"message": f"Элемент с id {apartment.id} уже существует в списке."})
+    return crud.add_apartment(db, apartment)
 
 
-@app.put(
+@app.patch(
     "/apartments/{apartment_id}",
     summary='Обновляет информацию об apartment',
     tags=['apartments']
 )
 async def update_apartment(
         apartment_id: int,
-        updated_item: Apartment,
+        updated_item: ApartmentUpdate,
         db: Session = Depends(get_db)
     ) -> Apartment:
     item = crud.update_apartment(db, apartment_id, updated_item)
@@ -129,7 +126,7 @@ async def update_apartment(
 
 @app.delete(
     "/apartments/{apartment_id}",
-    summary='Удаляет favorite item из базы',
+    summary='Удаляет apartment из базы',
     tags=['apartments']
 )
 async def delete_apartment(

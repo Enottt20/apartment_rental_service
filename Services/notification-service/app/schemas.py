@@ -19,3 +19,12 @@ class ReservationNotification(BaseModel):
     class Config:
         from_attributes = True
 
+
+class ReviewNotification(BaseModel):
+    email: EmailStr
+    title: str
+    description: str
+
+    class Config:
+        from_attributes = True
+

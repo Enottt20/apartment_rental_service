@@ -5,7 +5,7 @@ from pydantic import Field, Extra, AmqpDsn
 class Config(BaseSettings):
 
     SMTP_SERVER: str = Field(
-        default='smtp.gmail.com',
+        default='smtp.yandex.com',
         env='SMTP_SERVER',
         alias='SMTP_SERVER'
     )
@@ -40,10 +40,16 @@ class Config(BaseSettings):
         alias='RABBITMQ_DSN'
     )
 
-    QUEUE_NAME: str = Field(
+    QUEUE_RESERVATION_NAME: str = Field(
         default='notification',
-        env='QUEUE_NAME',
-        alias='QUEUE_NAME'
+        env='QUEUE_REVIEW_NAME',
+        alias='QUEUE_REVIEW_NAME'
+    )
+
+    QUEUE_REVIEW_NAME: str = Field(
+        default='notification',
+        env='QUEUE_REVIEW_NAME',
+        alias='QUEUE_REVIEW_NAME'
     )
 
 

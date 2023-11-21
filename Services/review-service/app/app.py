@@ -5,7 +5,7 @@ import logging
 from typing import List, Annotated
 from uuid import UUID
 
-from . import config, crud
+from . import config, crud, broker
 from .database import MongoDB
 from .schemas import ReviewUpdate, ReviewCreate, Review
 
@@ -26,7 +26,11 @@ logger.info("Service database loading...")
 MongoDB(mongo_dsn=str(cfg.mongo_dsn))
 logger.info("Service database loaded")
 
-
+message_producer = broker.MessageProducer(
+    dsn=cfg.RABBITMQ_DSN.unicode_string(),
+    exchange_name=cfg.EXCHANGE_NAME,
+    queue_name=cfg.QUEUE_NAME,
+)
 
 app = FastAPI(
     version='0.0.1',
@@ -39,8 +43,8 @@ app = FastAPI(
          response_model=List[Review],
          tags=['reviews']
 )
-async def get_reviews(skip: int = 0, limit: int = 10):
-    return crud.get_reviews(skip, limit)
+async def get_reviews(apartment_id: int, skip: int = 0, limit: int = 10):
+    return crud.get_reviews_by_apartment_id(apartment_id, skip, limit)
 
 
 @app.post("/reviews", 
@@ -49,10 +53,12 @@ async def get_reviews(skip: int = 0, limit: int = 10):
          tags=['reviews']
 )
 async def add_review(review: ReviewCreate) -> Review:
-    return crud.add_review(review)
+    review = await crud.add_review(review, message_producer)
+    if review:
+        return review
+    return JSONResponse(status_code=400, content={"message": "Отзыв уже существует"})
 
-
-@app.get("/reviews/{review_id}", 
+@app.get("/reviews/{review_id}",
          summary="Get review by id",
          tags=['reviews']
 )
@@ -63,7 +69,7 @@ async def get_review_uid(review_id: str) -> Review:
     return review
 
 
-@app.put("/reviews/{review_id}", 
+@app.patch("/reviews/{review_id}",
          summary="Update review info by id",
          tags=['reviews']
 )
