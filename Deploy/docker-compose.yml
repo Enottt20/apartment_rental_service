@@ -93,12 +93,6 @@ services:
         condition: service_healthy
     environment:
       POSTGRES_DSN: ${POSTGRES_DSN:-postgresql://postgres:postgres@postgresql:5432/postgres}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
 
     
 
