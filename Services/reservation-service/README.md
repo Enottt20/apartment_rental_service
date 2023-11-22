@@ -37,5 +37,5 @@ docker build -t "reservation-service:1.0" .
 
 Для запуска нужно перейти в Deploy:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```

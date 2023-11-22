@@ -16,5 +16,5 @@ IS_SMPT_SSL=False
 ## Запуск в docker-compose
 Для запуска нужно прописать данную комманду в директории Deploy предварительно запустив docker
 ```ini
-docker-compose up -d
+docker compose up -d
 ```
