@@ -17,21 +17,21 @@ class Config(BaseSettings):
     )
 
     EMAIL_LOGIN: str = Field(
-        default='EMAIL_LOGIN',
+        default='yantestsss22@yandex.ru',
         env='EMAIL_LOGIN',
         alias='EMAIL_LOGIN'
+    )
+
+    EMAIL_PASSWORD: str = Field(
+        default='pfxgsdpenvktcvtv',
+        env='EMAIL_PASSWORD',
+        alias='EMAIL_PASSWORD'
     )
 
     IS_SMPT_SSL: bool = Field(
         default=False,
         env='IS_SMPT_SSL',
         alias='IS_SMPT_SSL'
-    )
-
-    EMAIL_PASSWORD: str = Field(
-        default='EMAIL_PASSWORD',
-        env='EMAIL_PASSWORD',
-        alias='EMAIL_PASSWORD'
     )
 
     RABBITMQ_DSN: AmqpDsn = Field(
@@ -41,13 +41,13 @@ class Config(BaseSettings):
     )
 
     QUEUE_RESERVATION_NAME: str = Field(
-        default='notification',
-        env='QUEUE_REVIEW_NAME',
-        alias='QUEUE_REVIEW_NAME'
+        default='notification apartment rental',
+        env='QUEUE_RESERVATION_NAME',
+        alias='QUEUE_RESERVATION_NAME'
     )
 
     QUEUE_REVIEW_NAME: str = Field(
-        default='notification',
+        default='notification publish review',
         env='QUEUE_REVIEW_NAME',
         alias='QUEUE_REVIEW_NAME'
     )

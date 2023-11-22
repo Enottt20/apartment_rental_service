@@ -4,13 +4,13 @@ from pydantic import PostgresDsn, Field, Extra, AmqpDsn
 
 class Config(BaseSettings):
     POSTGRES_DSN: PostgresDsn = Field(
-        default='postgresql://postgres:postgres@localhost:5432/postgres',
+        default='postgresql://postgres:postgres@postgresql:5432/postgres',
         env='POSTGRES_DSN',
         alias='POSTGRES_DSN'
     )
 
     POLICY_SERVICE_ENTRYPOINT: str = Field(
-        default='http://localhost:5100/',
+        default='http://policy-enforcement-service:5100/',
         env='POLICY_SERVICE_ENTRYPOINT',
         alias='POLICY_SERVICE_ENTRYPOINT'
     )

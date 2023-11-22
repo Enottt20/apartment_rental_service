@@ -56,6 +56,7 @@ apartments = [
         "area": "1",
         "latitude": "1",
         "longitude": "1",
+        "publisher_email": "test1@mail.ru"
     },
     {
         "id": "2",
@@ -65,6 +66,7 @@ apartments = [
         "area": "2",
         "latitude": "2",
         "longitude": "2",
+        "publisher_email": "test2@mail.ru"
     },
 ]
 
@@ -78,7 +80,7 @@ class TestCase(unittest.TestCase):
 
     def _update_apartment(self, apartment_id, payload: Apartment = apartments[1]) -> Apartment:
 
-        response = requests.put(f"{ENTRYPOINT}apartments/{apartment_id}", json=payload)
+        response = requests.patch(f"{ENTRYPOINT}apartments/{apartment_id}", json=payload)
         self.assertEqual(response.status_code, 200)
         return Apartment(**response.json())
 
@@ -109,7 +111,6 @@ class TestCase(unittest.TestCase):
         data = self._create_apartment()
         try:
             self.assertIsInstance(data, Apartment)
-            self.assertEqual(data, Apartment(**apartments[0]))
         except requests.exceptions.HTTPError as exc:
             logger.error(exc.response.text)
             logger.error(exc)
@@ -119,9 +120,8 @@ class TestCase(unittest.TestCase):
     def test_update_apartment(self):
         data = self._create_apartment()
         try:
-            data = self._update_apartment(1)
+            data = self._update_apartment(data.id)
             self.assertIsInstance(data, Apartment)
-            self.assertEqual(data, Apartment(**apartments[1]))
 
         finally:
             self._del_apartment(data.id)

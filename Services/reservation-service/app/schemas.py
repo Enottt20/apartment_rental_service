@@ -2,16 +2,28 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr
 
 
-class Reservation(BaseModel):
-    id: int
+class BaseReservation(BaseModel):
     email: EmailStr
     arrival_date: datetime
     departure_date: datetime
     apartment_id: int
 
 
+class Reservation(BaseReservation):
+    id: int
+
     class Config:
         from_attributes = True
+
+
+class ReservationCreate(BaseReservation):
+    pass
+
+
+class ReservationUpdate(BaseReservation):
+    pass
+
+
 
 
 class ApartmentData(BaseModel):

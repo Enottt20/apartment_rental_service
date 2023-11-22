@@ -4,27 +4,27 @@ from pydantic import Field, Extra, MongoDsn, AmqpDsn
 
 class Config(BaseSettings):
     mongo_dsn: MongoDsn = Field(
-        default='mongodb://localhost:27017/',
+        default='mongodb://mongo:mongo@mongo:27017/mongo',
         env='MONGO_DSN',
         alias='MONGO_DSN'
     )
 
     APARTMENT_SERVICE_ENTRYPOINT: str = Field(
-        default='http://localhost:5002/',
+        default='http://apartment-service:5002/',
         env='APARTMENT_SERVICE_ENTRYPOINT',
         alias='APARTMENT_SERVICE_ENTRYPOINT'
     )
 
     RABBITMQ_DSN: AmqpDsn = Field(
-        default='amqp://guest:guest@localhost//',
+        default='amqp://guest:guest@rabbitmq//',
         env='RABBITMQ_DSN',
         alias='RABBITMQ_DSN'
     )
 
-    QUEUE_NAME: str = Field(
+    QUEUE_REVIEW_NAME: str = Field(
         default='notification publish review',
-        env='QUEUE_NAME',
-        alias='QUEUE_NAME'
+        env='QUEUE_REVIEW_NAME',
+        alias='QUEUE_REVIEW_NAME'
     )
 
     EXCHANGE_NAME: str = Field(

@@ -27,7 +27,7 @@ def run_all_scripts(script_paths):
 if __name__ == "__main__":
     tests_directory = "e2e_tests"
 
-    delay_before_start = 20
+    delay_before_start = 10
     logger.info(f"Waiting for {delay_before_start} seconds before starting tests.")
     time.sleep(delay_before_start)
 

@@ -192,7 +192,7 @@ class TestSellerPolicies(BaseUserTestCase):
     def test_get_reviews_list(self):
         self._raise_if_invalid_user()
         response = requests.get(
-            f'{ENTRYPOINT}reviews', headers=self.auth_headers
+            f'{ENTRYPOINT}reviews?apartment_id=5&skip=0&limit=10', headers=self.auth_headers
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -230,7 +230,7 @@ class TestCustomerPolicies(BaseUserTestCase):
     def test_get_favorites_list(self):
         self._raise_if_invalid_user()
         response = requests.get(
-            f'{ENTRYPOINT}favorites', headers=self.auth_headers
+            f'{ENTRYPOINT}favorites?user_email=user%40mail.ru&limit=1&offset=0', headers=self.auth_headers
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -248,7 +248,7 @@ class TestCustomerPolicies(BaseUserTestCase):
     def test_get_reviews_list(self):
         self._raise_if_invalid_user()
         response = requests.get(
-            f'{ENTRYPOINT}reviews', headers=self.auth_headers
+            f'{ENTRYPOINT}reviews?apartment_id=5&skip=0&limit=10', headers=self.auth_headers
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()

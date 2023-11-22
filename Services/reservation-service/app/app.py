@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, Query
 from starlette.responses import JSONResponse
-from .schemas import Reservation
+from .schemas import Reservation, ReservationUpdate, ReservationCreate
 from sqlalchemy.orm import Session
 from . import crud, config
 import typing
@@ -81,8 +81,8 @@ async def get_reservations(
     summary='Добавляет Reservation в базу',
     tags=['reservations']
 )
-async def add_Reservation(
-        Reservation: Reservation,
+async def add_reservation(
+        Reservation: ReservationCreate,
         db: Session = Depends(get_db)
     ) -> Reservation:
     item = await crud.add_reservation_item(db, Reservation, message_producer)
@@ -91,14 +91,14 @@ async def add_Reservation(
     return JSONResponse(status_code=404, content={"message": f"Элемент с id {Reservation.id} уже существует в списке."})
 
 
-@app.put(
+@app.patch(
     "/reservations/{reservation_id}",
     summary='Обновляет информацию об Reservation',
     tags=['reservations']
 )
-async def update_Reservation(
+async def update_reservation(
         reservation_id: int,
-        updated_item: Reservation,
+        updated_item: ReservationUpdate,
         db: Session = Depends(get_db)
     ) -> Reservation:
     item = crud.update_reservation_item(db, reservation_id, updated_item)
@@ -111,7 +111,7 @@ async def update_Reservation(
     summary='Удаляет favorite item из базы',
     tags=['reservations']
 )
-async def delete_Reservation(
+async def delete_reservation(
         reservation_id: int,
         db: Session = Depends(get_db)
     ) -> Reservation:

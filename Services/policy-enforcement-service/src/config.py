@@ -13,7 +13,7 @@ class Config(BaseSettings):
     )
 
     policies_config_path: FilePath = Field(
-        default='policies.yaml',
+        default='/mnt/policies.yaml',
         env='POLICIES_CONFIG_PATH',
         alias='POLICIES_CONFIG_PATH'
     )

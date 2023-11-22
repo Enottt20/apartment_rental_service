@@ -29,7 +29,7 @@ logger.info("Service database loaded")
 message_producer = broker.MessageProducer(
     dsn=cfg.RABBITMQ_DSN.unicode_string(),
     exchange_name=cfg.EXCHANGE_NAME,
-    queue_name=cfg.QUEUE_NAME,
+    queue_name=cfg.QUEUE_REVIEW_NAME,
 )
 
 app = FastAPI(
@@ -39,7 +39,7 @@ app = FastAPI(
 
 
 @app.get("/reviews", 
-         summary="Returns all reviews",
+         summary="Returns all reviews by apartment_id",
          response_model=List[Review],
          tags=['reviews']
 )

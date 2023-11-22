@@ -88,10 +88,10 @@ async def add_favorite_item(
     tags=['favorites']
 )
 async def delete_favorite_item(
-        favorite_item: FavoriteItemDelete,
+        item_id: int,
         db: Session = Depends(get_db)
     ) -> FavoriteItem:
-    if crud.delete_favorite_item(db, favorite_item):
+    if crud.delete_favorite_item(db, item_id):
         return JSONResponse(status_code=200, content={"message": "Item successfully deleted"})
     return JSONResponse(status_code=404, content={"message": "Item not found"})
 

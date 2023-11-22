@@ -1,7 +1,8 @@
-from mongoengine import Document
-from mongoengine import StringField, IntField
+from mongoengine import Document, StringField, IntField, UUIDField
+from uuid import uuid4
 
 class Review(Document):
+    id = UUIDField(primary_key=True, default=uuid4, binary=False)
     title = StringField(required=True,max_length=60)
     description = StringField()
     apartment_id = IntField()

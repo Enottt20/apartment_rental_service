@@ -1,5 +1,5 @@
 import aiohttp
-from .schemas import Reservation, ReservationNotification, ApartmentData
+from .schemas import ReservationNotification, ApartmentData, ReservationCreate, ReservationUpdate
 from sqlalchemy.orm import Session
 from .database import models
 from .broker import MessageProducer
@@ -20,24 +20,18 @@ def get_reservation_item(db: Session, item_id: int):
         .first()
 
 
-async def fetch_apartment_email(apartment_id: int) -> dict:
+async def fetch_apartment_data(apartment_id: int) -> dict:
     async with aiohttp.ClientSession() as session:
         async with session.get(f"{cfg.APARTMENT_SERVICE_ENTRYPOINT}apartments/{apartment_id}") as response:
             apartment_data = await response.json()
     return apartment_data
 
 
-async def add_reservation_item(db: Session, item: Reservation, message_producer: MessageProducer):
+async def add_reservation_item(db: Session, item: ReservationCreate, message_producer: MessageProducer):
 
-    db_item = models.Reservation(
-        id=item.id,
-        email=item.email,
-        arrival_date=item.arrival_date,
-        departure_date=item.departure_date,
-        apartment_id=item.apartment_id
-    )
+    db_item = models.Reservation(**item.model_dump())
 
-    apartment: dict  = await fetch_apartment_email(item.apartment_id)
+    apartment: dict = await fetch_apartment_data(item.apartment_id)
     title = apartment.get('title', None)
     address = apartment.get('address', None)
 
@@ -60,10 +54,10 @@ async def add_reservation_item(db: Session, item: Reservation, message_producer:
     db.commit()
     db.refresh(db_item)
 
-    return item
+    return db_item
 
 
-def update_reservation_item(db: Session, item_id: int, updated_item: Reservation):
+def update_reservation_item(db: Session, item_id: int, updated_item: ReservationUpdate):
     result = db.query(models.Reservation) \
         .filter(models.Reservation.id == item_id) \
         .update(updated_item.dict())

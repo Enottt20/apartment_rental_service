@@ -1,4 +1,4 @@
-from .schemas import FavoriteItemCreate, FavoriteItemDelete
+from .schemas import FavoriteItemCreate
 from sqlalchemy.orm import Session
 from .database import models
 
@@ -37,12 +37,11 @@ def add_favorite_item(db: Session, item: FavoriteItemCreate):
     return db_item
 
 
-def delete_favorite_item(db: Session, item: int):
+def delete_favorite_item(db: Session, item_id: int):
     db_favorite_item = (
         db.query(models.FavoriteItem)
         .filter(
-            models.FavoriteItem.user_email == item.user_email,
-            models.FavoriteItem.apartment_id == item.apartment_id
+            models.FavoriteItem.id == item_id
         )
         .delete()
     )

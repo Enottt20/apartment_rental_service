@@ -36,7 +36,7 @@ policies:
     - service: favorite-service
       rule: r.sub.group_id == 1
       resource: /favorites*
-      methods: (GET)|(POST)|(PUT)|(DELETE)
+      methods: (GET)|(POST)|(PUT)|(DELETE)|(PATCH)
     - service: apartment-service
       rule: r.sub.group_id == 1
       resource: /apartments*
@@ -48,18 +48,18 @@ policies:
     - service: review-service
       rule: r.sub.group_id == 1
       resource: /reviews*
-      methods: (GET)|(POST)|(PUT)|(DELETE)
+      methods: (GET)|(POST)|(PUT)|(DELETE)|(PATCH)
     - service: reservation-service
       rule: r.sub.group_id == 1
       resource: /reservations*
-      methods: (GET)|(POST)|(PUT)|(DELETE)
+      methods: (GET)|(POST)|(PUT)|(DELETE)|(PATCH)
 
 
       #Арендадатель
     - service: apartment-service
       rule: r.sub.group_id == 2
       resource: /apartments*
-      methods: (GET)|(POST)|(PUT)|(DELETE)
+      methods: (GET)|(POST)|(PUT)|(DELETE)|(PATCH)
     - service: user-service
       rule: r.sub.group_id == 2
       resource: /users/*
@@ -73,23 +73,27 @@ policies:
     - service: favorite-service
       rule: r.sub.group_id == 3
       resource: /favorites*
-      methods: (GET)|(POST)|(PUT)|(DELETE)
+      methods: (GET)|(POST)|(PUT)|(DELETE)|(PATCH)
     - service: apartment-service
       rule: r.sub.group_id == 3
       resource: /apartments*
-      methods: (GET)|(POST)|(PUT)|(DELETE)
+      methods: (GET)|(POST)|(PUT)|(DELETE)|(PATCH)
     - service: user-service
       rule: r.sub.group_id == 3
       resource: /users/*
-      methods: (GET)|(POST)|(PUT)|(DELETE)
+      methods: (GET)|(POST)|(PUT)|(DELETE)|(PATCH)
     - service: review-service
       rule: r.sub.group_id == 3
       resource: /reviews*
-      methods: (GET)|(POST)|(PUT)|(DELETE)
+      methods: (GET)|(POST)|(PUT)|(DELETE)|(PATCH)
     - service: user-service
       rule: r.sub.group_id == 3
       resource: /groups*
-      methods: (GET)|(POST)|(PUT)|(DELETE)
+      methods: (GET)|(POST)|(PUT)|(DELETE)|(PATCH)
+    - service: reservation-service
+      rule: r.sub.group_id == 3
+      resource: /reservations*
+      methods: (GET)|(POST)|(PUT)|(DELETE)|(PATCH)
 
       #общее
     - service: user-service
