@@ -6,6 +6,8 @@ from . import crud, config
 import typing
 import logging
 from .database import DB_INITIALIZER
+from fastapi.middleware.cors import CORSMiddleware
+
 
 # setup logging
 logger = logging.getLogger(__name__)
@@ -29,6 +31,14 @@ SessionLocal = DB_INITIALIZER.init_database(str(cfg.POSTGRES_DSN))
 
 app = FastAPI(
     title='Apartment service'
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[cfg.FRONT],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 def get_db():

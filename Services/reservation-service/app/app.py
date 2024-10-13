@@ -7,6 +7,8 @@ import typing
 import logging
 from .database import DB_INITIALIZER
 from . import broker
+from fastapi.middleware.cors import CORSMiddleware
+
 
 # setup logging
 logger = logging.getLogger(__name__)
@@ -36,6 +38,14 @@ message_producer = broker.MessageProducer(
 
 app = FastAPI(
     title='reservations service'
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[cfg.FRONT],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 def get_db():

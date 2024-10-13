@@ -9,6 +9,12 @@ class Config(BaseSettings):
         alias='POSTGRES_DSN'
     )
 
+    FRONT: str = Field(
+        default='http://localhost:3000',
+        env='FRONT',
+        alias='FRONT'
+    )
+
     default_groups_config_path: FilePath = Field(
         default='/mnt/default-groups.json',
         env='DEFAULT_GROUPS_CONFIG_PATH',

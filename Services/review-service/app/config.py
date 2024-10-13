@@ -9,6 +9,12 @@ class Config(BaseSettings):
         alias='MONGO_DSN'
     )
 
+    FRONT: str = Field(
+        default='http://localhost:3000',
+        env='FRONT',
+        alias='FRONT'
+    )
+
     APARTMENT_SERVICE_ENTRYPOINT: str = Field(
         default='http://apartment-service:5002/',
         env='APARTMENT_SERVICE_ENTRYPOINT',

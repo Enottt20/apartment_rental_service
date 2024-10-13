@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from . import database, config, schemas, crud
 from .auth import AuthInitializer, include_routers
 import json
+from fastapi.middleware.cors import CORSMiddleware
 
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,14 @@ logger.info(
 app = FastAPI(
     version='0.0.1',
     title='User service'
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[cfg.FRONT],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 auth = AuthInitializer()

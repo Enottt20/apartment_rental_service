@@ -12,6 +12,12 @@ class Config(BaseSettings):
         alias='JWT_SECRET'
     )
 
+    FRONT: str = Field(
+        default='http://localhost:3000',
+        env='FRONT',
+        alias='FRONT'
+    )
+
     policies_config_path: FilePath = Field(
         default='/mnt/policies.yaml',
         env='POLICIES_CONFIG_PATH',

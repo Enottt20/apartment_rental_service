@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 import logging
 from typing import List, Annotated
 from uuid import UUID
+from fastapi.middleware.cors import CORSMiddleware
 
 from . import config, crud, broker
 from .database import MongoDB
@@ -35,6 +36,14 @@ message_producer = broker.MessageProducer(
 app = FastAPI(
     version='0.0.1',
     title='review service'
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[cfg.FRONT],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
