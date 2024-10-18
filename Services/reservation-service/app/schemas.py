@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
+from typing import Generic, Optional, Sequence, TypeVar
 
 
 class BaseReservation(BaseModel):
@@ -22,6 +23,11 @@ class ReservationCreate(BaseReservation):
 
 class ReservationUpdate(BaseReservation):
     pass
+
+class PaginatedReservation(BaseModel):
+    items: list[Reservation]
+    size: Optional[int]
+    total: Optional[int]
 
 
 

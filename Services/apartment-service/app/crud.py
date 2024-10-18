@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from .database import models
 from sqlalchemy import func
 from geoalchemy2 import Geometry
+from sqlalchemy import text
+
 from .geo_functions import geocode_city
 
 def get_apartment(db: Session, apartment_id: int):
@@ -68,5 +70,11 @@ def delete_apartment(db: Session, apartment_id: int):
     result = db.query(models.Apartment) \
         .filter(models.Apartment.id == apartment_id) \
         .delete()
+    db.commit()
+    query = text("delete from favorite_items where apartment_id = :id;")
+    db.execute(query, {"id": apartment_id})
+    db.commit()
+    query = text("delete from reservation where apartment_id = :id;")
+    db.execute(query, {"id": apartment_id})
     db.commit()
     return result == 1

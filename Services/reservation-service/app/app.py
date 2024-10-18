@@ -1,10 +1,12 @@
 from fastapi import FastAPI, Depends, Query
 from starlette.responses import JSONResponse
-from .schemas import Reservation, ReservationUpdate, ReservationCreate
+from .schemas import Reservation, ReservationUpdate, ReservationCreate, PaginatedReservation
 from sqlalchemy.orm import Session
 from . import crud, config
 import typing
 import logging
+from pydantic import EmailStr
+
 from .database import DB_INITIALIZER
 from . import broker
 from fastapi.middleware.cors import CORSMiddleware
@@ -73,15 +75,16 @@ async def get_reservation(
 @app.get(
     "/reservations",
     summary='Возвращает список reservations',
-    response_model=list[Reservation],
+    response_model=PaginatedReservation,
     tags=['reservations']
 )
 async def get_reservations(
+        user_email: EmailStr,
         limit: int = 1,
         offset: int = 0,
         db: Session = Depends(get_db)
 ) -> typing.List[Reservation]:
-    return crud.get_reservation_items(db, limit=limit, offset=offset)
+    return crud.get_reservation_items(db, user_email, limit=limit, offset=offset)
 
 
 @app.post(

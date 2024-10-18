@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from pydantic import EmailStr
 from starlette.responses import JSONResponse
-from .schemas import FavoriteItem, FavoriteItemCreate, FavoriteItemDelete
+from .schemas import FavoriteItem, FavoriteItemCreate, FavoriteItemDelete, PaginatedFavoriteItemsResponse
 from sqlalchemy.orm import Session
 from . import crud, config
 import typing
@@ -48,25 +48,25 @@ def get_db():
     finally:
         db.close()
 
-@app.get(
-    "/favorites/{favoriteId}", status_code=201, response_model=FavoriteItem,
-    summary='По айди получить favorite item',
-    tags=['favorites']
-)
-async def get_favorite_item(
-        item_id: int,
-        db: Session = Depends(get_db)
-    ) -> FavoriteItem:
-    item = crud.get_favorite_item_by_id(db, item_id)
-    if item is not None:
-        return item
-    return JSONResponse(status_code=404, content={"message": "Item not found"})
+# @app.get(
+#     "/favorites/{favoriteId}", status_code=201, response_model=FavoriteItem,
+#     summary='По айди получить favorite item',
+#     tags=['favorites']
+# )
+# async def get_favorite_item(
+#         item_id: int,
+#         db: Session = Depends(get_db)
+#     ) -> FavoriteItem:
+#     item = crud.get_favorite_item_by_id(db, item_id)
+#     if item is not None:
+#         return item
+#     return JSONResponse(status_code=404, content={"message": "Item not found"})
 
 
 @app.get(
     "/favorites",
     summary='Возвращает список favorite items по почте пользователя',
-    response_model=list[FavoriteItem],
+    response_model=PaginatedFavoriteItemsResponse,
     tags=['favorites']
 )
 async def get_favorite_items(

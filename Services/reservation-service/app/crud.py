@@ -7,11 +7,22 @@ from . import config
 
 cfg: config.Config = config.load_config()
 
-def get_reservation_items(db: Session, limit: int = 1, offset: int = 0):
-    return db.query(models.Reservation) \
+def get_reservation_items(db: Session, user_email: str, limit: int = 1, offset: int = 0):
+    total_items = db.query(models.Reservation) \
+        .filter(models.Reservation.email == user_email) \
+        .count()
+
+    res = db.query(models.Reservation) \
+        .filter(models.Reservation.email == user_email) \
         .offset(offset) \
         .limit(limit) \
         .all()
+
+    return {
+        "items": res,
+        "total": total_items,
+        "size": len(res),
+    }
 
 
 def get_reservation_item(db: Session, item_id: int):

@@ -4,11 +4,21 @@ from .database import models
 
 
 def get_favorite_items_by_user_email(db: Session, user_email: str, limit: int = 1, offset: int = 0):
-    return db.query(models.FavoriteItem) \
+    total_items = db.query(models.FavoriteItem) \
+        .filter(models.FavoriteItem.user_email == user_email) \
+        .count()
+
+    res = db.query(models.FavoriteItem) \
         .filter(models.FavoriteItem.user_email == user_email) \
         .offset(offset) \
         .limit(limit) \
         .all()
+
+    return {
+        "items": res,
+        "total": total_items,
+        "size": len(res),
+    }
 
 
 def get_favorite_item_by_id(db: Session, item_id: int):
