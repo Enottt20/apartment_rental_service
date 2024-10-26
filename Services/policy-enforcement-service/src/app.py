@@ -36,7 +36,7 @@ app = App()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[app_config.FRONT],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
