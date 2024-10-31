@@ -9,6 +9,12 @@ class Config(BaseSettings):
         alias='MONGO_DSN'
     )
 
+    JWT_SECRET: str = Field(
+        default='JWT_SECRET',
+        env='JWT_SECRET',
+        alias='JWT_SECRET'
+    )
+
     FRONT: str = Field(
         default='http://localhost:3000',
         env='FRONT',

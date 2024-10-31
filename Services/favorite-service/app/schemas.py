@@ -7,7 +7,6 @@ from pydantic import BaseModel
 
 class BaseFavoriteItem(BaseModel):
     apartment_id: int
-    user_email: EmailStr
 
 
 class FavoriteItem(BaseFavoriteItem):
@@ -24,7 +23,7 @@ class PaginatedFavoriteItemsResponse(BaseModel):
 
 
 class FavoriteItemCreate(BaseFavoriteItem):
-    pass
+    user_email: EmailStr
 
 
 class FavoriteItemDelete(BaseFavoriteItem):

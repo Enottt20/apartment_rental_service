@@ -1,12 +1,14 @@
 from fastapi import FastAPI, Depends, Query
+from fastapi import FastAPI, Depends, Request
 from starlette.responses import JSONResponse
-from .schemas import Apartment, ApartmentsQuery, ApartmentCreate, ApartmentUpdate
+from .schemas import Apartment, ApartmentsQuery, ApartmentCreate, ApartmentUpdate, BaseApartment, PaginatedApartmentResponse
 from sqlalchemy.orm import Session
 from . import crud, config
 import typing
 import logging
 from .database import DB_INITIALIZER
 from fastapi.middleware.cors import CORSMiddleware
+import jwt
 
 
 # setup logging
@@ -41,12 +43,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+
+def extract_email_data(request: Request) -> str:
+    try:
+        if 'authorization' in request.headers:
+            token = request.headers['authorization'].split(' ')[1]
+            data = jwt.decode(token, cfg.JWT_SECRET, algorithms=["HS256"], audience=["fastapi-users:auth"])
+            return data.get("email")
+    except:
+        return None
 
 
 @app.get(
@@ -67,24 +80,31 @@ async def get_apartment(
 @app.get(
     "/apartments",
     summary='Возвращает список apartments',
-    response_model=list[Apartment],
+    response_model=PaginatedApartmentResponse,
     tags=['apartments']
 )
 async def get_apartments(
+        request: Request,
+        my_apartments: bool = Query(False, description="Получить свои апартаменты"),
         limit: int = Query(10, description="Максимальное количество записей"),
         offset: int = Query(0, description="Смещение записей"),
         city_name: str = Query(None, description="Название города"),
         radius: float = Query(None, description="радиус в метрах"),
         latitude: float = Query(None, description="широта"),
         longitude: float = Query(None, description="долгота"),
-        db: Session = Depends(get_db)
-    ) -> typing.List[Apartment]:
+        db: Session = Depends(get_db),
+) -> PaginatedApartmentResponse:
     """
     Возвращает список ближайших квартир и сортирует по близости.
     В первую очередь по городу.
     Во вторую очередь по широте и долготе.
     Если не указать город и координаты, то вернет просто список квартир.
     """
+
+    if my_apartments:
+        apartments = crud.get_my_apartments(db, extract_email_data(request))
+
+        return apartments
 
     apartments_query = ApartmentsQuery(
         limit=limit,
@@ -97,7 +117,7 @@ async def get_apartments(
 
     apartments = crud.get_apartments(db, apartments_query)
 
-    return apartments
+    return PaginatedApartmentResponse(**apartments)
 
 
 @app.post(
@@ -108,10 +128,12 @@ async def get_apartments(
     tags=['apartments']
 )
 async def add_apartment(
-        apartment: ApartmentCreate,
+        request: Request,
+        apartment: BaseApartment,
         db: Session = Depends(get_db)
     ) -> Apartment:
-    return crud.add_apartment(db, apartment)
+    apartment_item_create = ApartmentCreate(**apartment.dict(), publisher_email=extract_email_data(request))
+    return crud.add_apartment(db, apartment_item_create)
 
 
 @app.patch(
@@ -120,11 +142,13 @@ async def add_apartment(
     tags=['apartments']
 )
 async def update_apartment(
+        request: Request,
         apartment_id: int,
-        updated_item: ApartmentUpdate,
+        updated_item: BaseApartment,
         db: Session = Depends(get_db)
     ) -> Apartment:
-    item = crud.update_apartment(db, apartment_id, updated_item)
+    apartment_item_updated = ApartmentUpdate(**updated_item.dict(), publisher_email=extract_email_data(request))
+    item = crud.update_apartment(db, apartment_id, apartment_item_updated)
     if item is not None:
         return item
     return JSONResponse(status_code=404, content={"message": "Item not found"})

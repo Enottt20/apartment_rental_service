@@ -9,22 +9,23 @@ class BaseApartment(BaseModel):
     area: int
     latitude: float
     longitude: float
-    publisher_email: EmailStr
 
 
 class Apartment(BaseApartment):
     id: int
+    publisher_email: EmailStr
 
     class Config:
         from_attributes = True
 
 
 class ApartmentCreate(BaseApartment):
-    pass
+    publisher_email: EmailStr
 
 
 class ApartmentUpdate(BaseApartment):
-    pass
+    publisher_email: EmailStr
+
 
 class ApartmentsQuery(BaseModel):
     city_name: Optional[str]
@@ -33,3 +34,10 @@ class ApartmentsQuery(BaseModel):
     radius: Optional[float]
     limit: int = 1
     offset: int = 0
+
+
+class PaginatedApartmentResponse(BaseModel):
+    items: list[Apartment]
+    size: Optional[int]
+    total: Optional[int]
+

@@ -4,7 +4,6 @@ from typing import Generic, Optional, Sequence, TypeVar
 
 
 class BaseReservation(BaseModel):
-    email: EmailStr
     arrival_date: datetime
     departure_date: datetime
     apartment_id: int
@@ -18,11 +17,12 @@ class Reservation(BaseReservation):
 
 
 class ReservationCreate(BaseReservation):
-    pass
+    email: EmailStr
 
 
 class ReservationUpdate(BaseReservation):
-    pass
+    email: EmailStr
+
 
 class PaginatedReservation(BaseModel):
     items: list[Reservation]

@@ -2,14 +2,15 @@ from fastapi import FastAPI, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 
 import logging
+from fastapi import FastAPI, Depends, Request
+
 from typing import List, Annotated
 from uuid import UUID
 from fastapi.middleware.cors import CORSMiddleware
-
+import jwt
 from . import config, crud, broker
 from .database import MongoDB
-from .schemas import ReviewUpdate, ReviewCreate, Review
-
+from .schemas import ReviewUpdate, ReviewCreate, Review, ReviewBase
 
 logger = logging.getLogger("review-service")
 logging.basicConfig(level=logging.INFO, 
@@ -46,6 +47,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def extract_email_data(request: Request) -> str:
+    try:
+        if 'authorization' in request.headers:
+            token = request.headers['authorization'].split(' ')[1]
+            data = jwt.decode(token, cfg.JWT_SECRET, algorithms=["HS256"], audience=["fastapi-users:auth"])
+            return data.get("email")
+    except:
+        return None
+
 
 @app.get("/reviews", 
          summary="Returns all reviews by apartment_id",
@@ -61,8 +71,9 @@ async def get_reviews(apartment_id: int, skip: int = 0, limit: int = 10):
          response_model=Review,
          tags=['reviews']
 )
-async def add_review(review: ReviewCreate) -> Review:
-    review = await crud.add_review(review, message_producer)
+async def add_review(request: Request, review: ReviewBase) -> Review:
+    review_item_create = ReviewCreate(**review.dict(), user_email=extract_email_data(request))
+    review = await crud.add_review(review_item_create, message_producer)
     if review:
         return review
     return JSONResponse(status_code=400, content={"message": "Отзыв уже существует"})

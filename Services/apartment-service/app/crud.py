@@ -33,12 +33,32 @@ def get_apartments(db: Session, apartments_query: ApartmentsQuery):
         query = query.filter(func.ST_DWithin(models.Apartment.location, location, apartments_query.radius))
         query = query.order_by(func.ST_Distance(models.Apartment.location, location))
 
+    total_items = query.count()
 
     query = query.offset(apartments_query.offset).limit(apartments_query.limit)
+
     apartments = query.all()
 
-    return apartments
+    return {
+        "items": apartments,
+        "total": total_items,
+        "size": len(apartments),
+    }
 
+
+def get_my_apartments(db: Session, email: str):
+
+    query = db.query(models.Apartment).filter(models.Apartment.publisher_email==email)
+
+    total_items = query.count()
+
+    res = query.all()
+
+    return {
+        "items": res,
+        "total": total_items,
+        "size": len(res),
+    }
 
 def add_apartment(db: Session, apartment: ApartmentCreate):
     db_item = models.Apartment(**apartment.model_dump())

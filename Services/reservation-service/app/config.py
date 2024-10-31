@@ -15,6 +15,12 @@ class Config(BaseSettings):
         alias='FRONT'
     )
 
+    JWT_SECRET: str = Field(
+        default='JWT_SECRET',
+        env='JWT_SECRET',
+        alias='JWT_SECRET'
+    )
+
     APARTMENT_SERVICE_ENTRYPOINT: str = Field(
         default='http://apartment-service:5002/',
         env='APARTMENT_SERVICE_ENTRYPOINT',

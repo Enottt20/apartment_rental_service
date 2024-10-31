@@ -4,7 +4,6 @@ from uuid import UUID
 
 class ReviewBase(BaseModel):
     apartment_id: int
-    user_email: EmailStr
     title: str
     description: str
 
@@ -16,7 +15,7 @@ class ReviewNotification(BaseModel):
 
 
 class ReviewCreate(ReviewBase):
-    pass
+    user_email: EmailStr
 
 
 class ReviewUpdate(BaseModel):

@@ -1,14 +1,14 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from pydantic import EmailStr
 from starlette.responses import JSONResponse
-from .schemas import FavoriteItem, FavoriteItemCreate, FavoriteItemDelete, PaginatedFavoriteItemsResponse
+from .schemas import FavoriteItem, FavoriteItemDelete, PaginatedFavoriteItemsResponse, FavoriteItemCreate, BaseFavoriteItem
 from sqlalchemy.orm import Session
 from . import crud, config
 import typing
 import logging
 from .database import DB_INITIALIZER
 from fastapi.middleware.cors import CORSMiddleware
-
+import jwt
 # setup logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -41,6 +41,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -48,6 +49,15 @@ def get_db():
     finally:
         db.close()
 
+
+def extract_email_data(request: Request) -> str:
+    try:
+        if 'authorization' in request.headers:
+            token = request.headers['authorization'].split(' ')[1]
+            data = jwt.decode(token, cfg.JWT_SECRET, algorithms=["HS256"], audience=["fastapi-users:auth"])
+            return data.get("email")
+    except:
+        return None
 # @app.get(
 #     "/favorites/{favoriteId}", status_code=201, response_model=FavoriteItem,
 #     summary='По айди получить favorite item',
@@ -70,12 +80,12 @@ def get_db():
     tags=['favorites']
 )
 async def get_favorite_items(
-        user_email: EmailStr,
+        request: Request,
         limit: int = 1,
         offset: int = 0,
         db: Session = Depends(get_db)
     ) -> typing.List[FavoriteItem]:
-    return crud.get_favorite_items_by_user_email(db, user_email=user_email, limit=limit, offset=offset)
+    return crud.get_favorite_items_by_user_email(db, user_email=extract_email_data(request), limit=limit, offset=offset)
 
 
 @app.post(
@@ -86,10 +96,12 @@ async def get_favorite_items(
     tags=['favorites']
 )
 async def add_favorite_item(
-        favorite_item: FavoriteItemCreate,
+        request: Request,
+        favorite_item: BaseFavoriteItem,
         db: Session = Depends(get_db)
     ) -> FavoriteItem:
-    return crud.add_favorite_item(db, favorite_item)
+    favorite_item_create = FavoriteItemCreate(**favorite_item.dict(), user_email=extract_email_data(request))
+    return crud.add_favorite_item(db, favorite_item_create)
 
 @app.delete(
     "/favorites/{favoriteId}",

@@ -15,6 +15,12 @@ class Config(BaseSettings):
         alias='FRONT'
     )
 
+    JWT_SECRET: str = Field(
+        default='JWT_SECRET',
+        env='JWT_SECRET',
+        alias='JWT_SECRET'
+    )
+
     class Config:
         env_file = ".env"  # Указываем имя файла .env
         extra = Extra.allow  # Разрешаем дополнительные входные данные

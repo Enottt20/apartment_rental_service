@@ -1,12 +1,13 @@
 from fastapi import FastAPI, Depends, Query
 from starlette.responses import JSONResponse
-from .schemas import Reservation, ReservationUpdate, ReservationCreate, PaginatedReservation
+from .schemas import Reservation, ReservationUpdate, ReservationCreate, PaginatedReservation, BaseReservation
 from sqlalchemy.orm import Session
 from . import crud, config
 import typing
 import logging
 from pydantic import EmailStr
-
+from fastapi import FastAPI, Depends, Request
+import jwt
 from .database import DB_INITIALIZER
 from . import broker
 from fastapi.middleware.cors import CORSMiddleware
@@ -57,6 +58,17 @@ def get_db():
     finally:
         db.close()
 
+
+def extract_email_data(request: Request) -> str:
+    try:
+        if 'authorization' in request.headers:
+            token = request.headers['authorization'].split(' ')[1]
+            data = jwt.decode(token, cfg.JWT_SECRET, algorithms=["HS256"], audience=["fastapi-users:auth"])
+            return data.get("email")
+    except:
+        return None
+
+
 @app.get(
     "/reservations/{reservation_id}", status_code=201, response_model=Reservation,
     summary='По айди получить Reservation',
@@ -79,12 +91,12 @@ async def get_reservation(
     tags=['reservations']
 )
 async def get_reservations(
-        user_email: EmailStr,
+        request: Request,
         limit: int = 1,
         offset: int = 0,
         db: Session = Depends(get_db)
 ) -> typing.List[Reservation]:
-    return crud.get_reservation_items(db, user_email, limit=limit, offset=offset)
+    return crud.get_reservation_items(db, extract_email_data(request), limit=limit, offset=offset)
 
 
 @app.post(
@@ -95,29 +107,33 @@ async def get_reservations(
     tags=['reservations']
 )
 async def add_reservation(
-        Reservation: ReservationCreate,
+        request: Request,
+        reservation: BaseReservation,
         db: Session = Depends(get_db)
     ) -> Reservation:
-    item = await crud.add_reservation_item(db, Reservation, message_producer)
+    reservation_item_create = ReservationCreate(**reservation.dict(), email=extract_email_data(request))
+    item = await crud.add_reservation_item(db, reservation_item_create, message_producer)
     if item is not None:
         return item
-    return JSONResponse(status_code=404, content={"message": f"Элемент с id {Reservation.id} уже существует в списке."})
+    return JSONResponse(status_code=404, content={"message": f"Элемент уже существует в списке."})
 
 
-@app.patch(
-    "/reservations/{reservation_id}",
-    summary='Обновляет информацию об Reservation',
-    tags=['reservations']
-)
-async def update_reservation(
-        reservation_id: int,
-        updated_item: ReservationUpdate,
-        db: Session = Depends(get_db)
-    ) -> Reservation:
-    item = crud.update_reservation_item(db, reservation_id, updated_item)
-    if item is not None:
-        return item
-    return JSONResponse(status_code=404, content={"message": "Item not found"})
+# @app.patch(
+#     "/reservations/{reservation_id}",
+#     summary='Обновляет информацию об Reservation',
+#     tags=['reservations']
+# )
+# async def update_reservation(
+#         request: Request,
+#         reservation_id: int,
+#         updated_item: BaseReservation,
+#         db: Session = Depends(get_db)
+#     ) -> Reservation:
+#     reservation_item_update = ReservationUpdate(**updated_item.dict(), email=extract_email_data(request))
+#     item = crud.update_reservation_item(db, reservation_id, reservation_item_update)
+#     if item is not None:
+#         return item
+#     return JSONResponse(status_code=404, content={"message": "Item not found"})
 
 @app.delete(
     "/reservations/{reservation_id}",
